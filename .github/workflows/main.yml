@@ -42,6 +42,7 @@ jobs:
       # Push image to Google Container Registry
       - name: Push
         run: |
+          gcloud auth login
           docker push "asia-northeast3-docker.pkg.dev/clever-coast-409912/trab/$DOCKER_IMAGE_NAME:$GITHUB_SHA"
 
       # Deploy to Google Compute Engine instance

@@ -37,7 +37,7 @@ jobs:
       # Configure docker to use the gcloud command-line tool as a credential helper
       - name: Configure Docker
         run: |
-          gcloud auth configure-docker -q
+          gcloud auth configure-docker asia-northeast3-docker.pkg.dev
 
       # Push image to Google Container Registry
       - name: Push

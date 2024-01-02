@@ -43,7 +43,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: --platform=linux/amd64
+          platforms: linux/amd64
 
       # CD 시작 부분 (GCE 배포 설정)
       - name: Setup gcloud auth

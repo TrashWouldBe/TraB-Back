@@ -1,48 +1,44 @@
-name: Docker image build and push to GCP
+name: Create and publish a Docker image to GCP Artifact Registry, Deploy to Cloudtype
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  DOCKER_IMAGE_NAME: trab-image
-  GCE_INSTANCE: ${{ secrets.GCE_INSTANCE }}
-  GCE_INSTANCE_ZONE: ${{ secrets.GCE_INSTANCE_ZONE }}
+  REGISTRY: ${{ secrets.GAR_REGISTRY }}
+  IMAGE_NAME: trab-image
 
 jobs:
-  build:
-    name: Setup, Build, Publish, and Deploy
+  build-and-push-image:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      # Setup gcloud CLI
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
         with:
-          service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-      - run: |
-          gcloud --quiet auth configure-docker
-
-      # Build docker image
-      - name: Build
-        run: |
-          docker build . --tag "asia-northeast3-docker.pkg.dev/clever-coast-409912/trab/$DOCKER_IMAGE_NAME:$GITHUB_SHA"
-
-      # Configure docker to use the gcloud command-line tool as a credential helper
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker asia-northeast3-docker.pkg.dev
-
-      # Push image to Google Container Registry
-      - name: Push
-        run: |
-          docker push "asia-northeast3-docker.pkg.dev/clever-coast-409912/trab/$DOCKER_IMAGE_NAME:$GITHUB_SHA"
+          registry: ${{ env.REGISTRY }}
+          username: _json_key
+          password: ${{ secrets.GAR_JSON_KEY }}
+          
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha
+      - name: Build and push Docker image
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       # Deploy to Google Compute Engine instance
       - name: Deploy

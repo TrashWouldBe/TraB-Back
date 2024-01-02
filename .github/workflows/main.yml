@@ -10,7 +10,7 @@ env:
   REGISTRY: ${{ secrets.GAR_REGISTRY }}
   IMAGE_NAME: trab-image
   GCE_INSTANCE: trab-instance
-  GCE_INSTANCE_ZONE: asia-northeast3
+  GCE_INSTANCE_ZONE: asia-northeast3-a
 
 jobs:
   build-and-push-image:

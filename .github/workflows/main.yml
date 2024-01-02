@@ -6,8 +6,11 @@ on:
       - main
 
 env:
+  PROJECT_ID: clever-coast-409912
   REGISTRY: ${{ secrets.GAR_REGISTRY }}
   IMAGE_NAME: trab-image
+  GCE_INSTANCE: trab-instance
+  GCE_INSTANCE_ZONE: asia-northeast3
 
 jobs:
   build-and-push-image:
@@ -40,9 +43,17 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      # CD 시작 부분 (GCE 배포 설정)
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GAR_JSON_KEY }}
+          project_id: ${{ env.PROJECT_ID }}
+          export_default_credentials: true
+
       # Deploy to Google Compute Engine instance
       - name: Deploy
         run: |
           gcloud compute instances update-container "$GCE_INSTANCE" \
             --zone "$GCE_INSTANCE_ZONE" \
-            --container-image "asia-northeast3-docker.pkg.dev/clever-coast-409912/trab/$DOCKER_IMAGE_NAME:$GITHUB_SHA"
+            --container-image "asia-northeast3-docker.pkg.dev/clever-coast-409912/trab/trab-image:$GITHUB_SHA"

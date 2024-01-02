@@ -65,4 +65,4 @@ jobs:
         run: |
           gcloud compute instances update-container "$GCE_INSTANCE" \
             --zone "$GCE_INSTANCE_ZONE" \
-            --container-image "asia-northeast3-docker.pkg.dev/clever-coast-409912/trab/trab-image:latest"
+            --container-image "asia-northeast3-docker.pkg.dev/clever-coast-409912/trab/trab-image:$GITHUB_SHA"

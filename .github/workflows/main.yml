@@ -46,7 +46,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: $GITHUB_SHA
+          tags: ${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
 
       # CD 시작 부분 (GCE 배포 설정)

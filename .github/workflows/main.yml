@@ -44,12 +44,13 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       # CD 시작 부분 (GCE 배포 설정)
+      - name: Setup gcloud auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GAR_JSON_KEY }}
+      
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
-        with:
-          service_account_key: ${{ secrets.GAR_JSON_KEY }}
-          project_id: ${{ env.PROJECT_ID }}
-          export_default_credentials: true
 
       # Deploy to Google Compute Engine instance
       - name: Deploy

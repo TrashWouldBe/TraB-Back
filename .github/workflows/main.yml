@@ -63,8 +63,7 @@ jobs:
       # Deploy to Google Compute Engine instance
       - name: Deploy
         run: |
+          TAG: ${{ steps.meta.outputs.tags }}
           gcloud compute instances update-container "$GCE_INSTANCE" \
             --zone "$GCE_INSTANCE_ZONE" \
             --container-image "asia-northeast3-docker.pkg.dev/clever-coast-409912/trab/trab-image:$TAG"
-          env:
-            TAG: ${{ steps.meta.outputs.tags }}

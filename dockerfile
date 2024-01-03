@@ -19,5 +19,7 @@ WORKDIR /app
 ENV NODE_ENV production
 #9
 COPY --from=builder /app ./
+# 포트 개방
+EXPOSE 3000
 #10
 CMD ["npm", "run", "start:prod"]

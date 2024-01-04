@@ -66,8 +66,7 @@ jobs:
           TAG="${{ steps.meta.outputs.tags }}"
           gcloud compute instances update-container "$GCE_INSTANCE" \
           --zone "$GCE_INSTANCE_ZONE" \
-          --container-image "$TAG" \
-          --tags http-server
+          --container-image "$TAG"
 
           gcloud compute instances add-tags "$GCE_INSTANCE" \
           --zone "$GCE_INSTANCE_ZONE" \

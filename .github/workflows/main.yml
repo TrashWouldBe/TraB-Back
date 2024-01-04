@@ -71,7 +71,3 @@ jobs:
           gcloud compute instances add-tags "$GCE_INSTANCE" \
           --zone "$GCE_INSTANCE_ZONE" \
           --tags http-server
-
-          gcloud compute firewall-rules create allow-http \
-          --allow tcp:3000 \
-          --target-tags http-server

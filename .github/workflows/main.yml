@@ -73,5 +73,5 @@ jobs:
           --tags http-server
 
           gcloud compute firewall-rules create allow-http \
-          --allow tcp:3000 
+          --allow tcp:3000 \
           --target-tags http-server

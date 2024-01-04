@@ -1,6 +1,6 @@
 # STEP 1
 # 1
-FROM --platform=linux/amd64 node:16 AS builder
+FROM --platform=linux/amd64 node:21 AS builder
 # 2
 WORKDIR /app
 # 3
@@ -12,7 +12,7 @@ RUN npm run build
 
 # STEP 2
 #6
-FROM --platform=linux/amd64 node:16-alpine
+FROM --platform=linux/amd64 node:21-alpine
 #7
 WORKDIR /app
 #8

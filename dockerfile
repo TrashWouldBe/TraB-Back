@@ -8,18 +8,20 @@ COPY . .
 # 4
 RUN npm install
 # 5
+RUN npm ci
+# 6
 RUN npm run build
 
 # STEP 2
-#6
+# 7
 FROM --platform=linux/amd64 node:21-alpine
-#7
+# 8
 WORKDIR /app
-#8
+# 9
 ENV NODE_ENV production
-#9
+# 10
 COPY --from=builder /app ./
-# 포트 개방
+# 11
 EXPOSE 3000
-#10
+# 12
 CMD ["npm", "run", "start:prod"]

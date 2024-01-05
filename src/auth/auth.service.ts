@@ -18,17 +18,18 @@ export class AuthService {
       }
 
       let userInfo: UserInfo;
-      await admin
+      admin
         .auth()
         .verifyIdToken(idToken)
         .then((decodedToken) => {
-          userInfo.uid = decodedToken.uid;
-          userInfo.email = decodedToken.email;
+          userInfo = {
+            uid: decodedToken.uid,
+            email: decodedToken.email,
+          };
         })
         .catch(() => {
           throw new UnauthorizedException('login fail : token info error');
         });
-      console.log(userInfo);
       return userInfo.uid;
     } catch (err) {
       throw err;

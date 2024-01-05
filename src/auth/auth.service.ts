@@ -8,12 +8,11 @@ export class AuthService {
   async validateUser(request: Request): Promise<string> {
     try {
       let idToken: string | null = null;
-
       if (
-        request.headers['Authorization'] &&
-        request.headers['Authorization'].startsWith('Bearer')
+        request.headers['authorization'] &&
+        request.headers['authorization'].startsWith('Bearer')
       ) {
-        idToken = request.headers['Authorization'].split('Bearer')[1];
+        idToken = request.headers['authorization'].split('Bearer')[1];
       } else {
         throw new UnauthorizedException('login fail : no token');
       }

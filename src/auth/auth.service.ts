@@ -12,24 +12,24 @@ export class AuthService {
         request.headers['authorization'] &&
         request.headers['authorization'].startsWith('Bearer')
       ) {
-        idToken = request.headers['authorization'].split('Bearer')[1];
+        idToken = request.headers['authorization'].split('Bearer ')[1];
       } else {
         throw new UnauthorizedException('login fail : no token');
       }
 
       let userInfo: UserInfo;
-
       admin
         .auth()
         .verifyIdToken(idToken)
         .then((decodedToken) => {
-          userInfo.uid = decodedToken.uid;
-          userInfo.email = decodedToken.email;
+          userInfo = {
+            uid: decodedToken.uid,
+            email: decodedToken.email,
+          };
         })
         .catch(() => {
           throw new UnauthorizedException('login fail : token info error');
         });
-
       return userInfo.uid;
     } catch (err) {
       throw err;

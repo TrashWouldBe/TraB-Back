@@ -19,7 +19,7 @@ export class AuthService {
       }
 
       let userInfo: UserInfo;
-      this.firebaseService
+      await this.firebaseService
         .getAuth()
         .verifyIdToken(idToken)
         .then((decodedToken) => {

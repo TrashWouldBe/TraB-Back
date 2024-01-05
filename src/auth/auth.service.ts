@@ -12,14 +12,13 @@ export class AuthService {
         request.headers['authorization'] &&
         request.headers['authorization'].startsWith('Bearer')
       ) {
-        idToken = request.headers['authorization'].split('Bearer')[1];
+        idToken = request.headers['authorization'].split('Bearer ')[1];
       } else {
         throw new UnauthorizedException('login fail : no token');
       }
 
       let userInfo: UserInfo;
-
-      admin
+      await admin
         .auth()
         .verifyIdToken(idToken)
         .then((decodedToken) => {
@@ -29,7 +28,7 @@ export class AuthService {
         .catch(() => {
           throw new UnauthorizedException('login fail : token info error');
         });
-
+      console.log(userInfo);
       return userInfo.uid;
     } catch (err) {
       throw err;

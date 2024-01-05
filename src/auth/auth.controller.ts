@@ -1,7 +1,22 @@
-import { Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Req } from '@nestjs/common';
 // import { LoginResultType } from 'src/common/constant/login-result-type';
 import { AuthService } from './auth.service';
 import { ApiHeader, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { serializeMessage } from 'src/common/utils';
+import { SUCCESS_CODE } from 'src/common/constants';
+import { SerializedMessage } from 'src/common/types';
+import {
+  FailGetKakaoLoginInfoDTO,
+  FailLoginFirebaseResponseDTO,
+  LoginSuccessResponseDTO,
+  MissingKakaoAccountResponseDTO,
+  SocialSignInDTO,
+} from 'src/service/dto/socialSignInDTO';
+import {
+  FAIL_GET_KAKAO_LOGIN_INFO,
+  FAIL_LOGIN_FIREBASE,
+  KAKAO_ACCOUNT_REQUIRED,
+} from 'src/common/error/constants';
 
 @Controller('auth')
 export class AuthController {
@@ -29,5 +44,44 @@ export class AuthController {
   async login(@Req() request: Request): Promise<string> {
     const result: string = await this.authService.validateUser(request);
     return result;
+  }
+  @Post('/socialSignIn')
+  @ApiOperation({
+    summary: '소셜 로그인 (카카오/구글)',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: '로그인 성공',
+    type: LoginSuccessResponseDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: KAKAO_ACCOUNT_REQUIRED,
+    type: MissingKakaoAccountResponseDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: FAIL_LOGIN_FIREBASE,
+    type: FailLoginFirebaseResponseDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: FAIL_GET_KAKAO_LOGIN_INFO,
+    type: FailGetKakaoLoginInfoDTO,
+  })
+  async socialSignIn(
+    @Body() socialSignInDto: SocialSignInDTO,
+  ): Promise<SerializedMessage> {
+    const { access_token, provider /*fcm_token*/ } = socialSignInDto;
+    const data = await this.authService.socialSignIn(
+      access_token,
+      // fcm_token,
+      provider,
+    );
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
   }
 }

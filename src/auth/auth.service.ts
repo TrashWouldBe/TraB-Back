@@ -1,10 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-// import { LoginResultType } from 'src/common/constant/login-result-type';
-import * as admin from 'firebase-admin';
-import { UserInfo } from 'src/common/custom-type/user-info.type';
+import { AuthProvider, UserInfo } from 'src/common/types';
+import { signInWithKakao } from './kakao';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class AuthService {
+  constructor(private firebaseService: FirebaseService) {}
   async validateUser(request: Request): Promise<string> {
     try {
       let idToken: string | null = null;
@@ -18,8 +19,8 @@ export class AuthService {
       }
 
       let userInfo: UserInfo;
-      admin
-        .auth()
+      this.firebaseService
+        .getAuth()
         .verifyIdToken(idToken)
         .then((decodedToken) => {
           userInfo = {
@@ -34,5 +35,28 @@ export class AuthService {
     } catch (err) {
       throw err;
     }
+  }
+
+  async socialSignIn(
+    accessToken: string,
+    // fcmToken: string,
+    provider: AuthProvider,
+  ) {
+    let uid, token;
+    if (provider === 'kakao') {
+      ({ uid, token } = await signInWithKakao(
+        accessToken,
+        this.firebaseService.getAuth(),
+      ));
+    }
+    //푸시알림 사용할꺼면 fcmToken사용
+
+    //userData DB에 저장
+
+    return {
+      uid: uid,
+      token: token,
+      // 필요한 다른 데이터
+    };
   }
 }

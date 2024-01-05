@@ -7,7 +7,6 @@ import { UserInfo } from 'src/common/custom-type/user-info.type';
 export class AuthService {
   async validateUser(request: Request): Promise<string> {
     try {
-      console.log(request);
       let idToken: string | null = null;
       if (
         request.headers['authorization'] &&

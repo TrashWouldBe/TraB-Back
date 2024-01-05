@@ -18,7 +18,7 @@ export class AuthService {
       }
 
       let userInfo: UserInfo;
-      admin
+      await admin
         .auth()
         .verifyIdToken(idToken)
         .then((decodedToken) => {

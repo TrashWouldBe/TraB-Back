@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { FirebaseModule } from 'firebase/firebase.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [ConfigModule.forRoot(), AuthModule, FirebaseModule],

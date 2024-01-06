@@ -15,6 +15,9 @@ import {
 import { Auth } from 'firebase-admin/lib/auth/auth';
 import { AppleUserInfo } from './types/apple-userinfo.type';
 import { AuthProvider } from './types/auth-provider.type';
+import { SocialSignInWithAppleDTO } from './dto/social-signIn-with-apple.dto';
+import { UserToken } from './types/user-token.type';
+import { SocialSignInDTO } from './dto/social-signin.dto';
 
 @Injectable()
 export class AuthService {
@@ -183,32 +186,35 @@ export class AuthService {
   };
 
   async socialSignInWithKakao(
-    accessToken: string,
-    // fcmToken: string,
-    provider: AuthProvider,
-  ) {
-    let uid, token;
+    socialSignInDto: SocialSignInDTO,
+  ): Promise<UserToken> {
+    const { access_token, provider /*fcm_token*/ } = socialSignInDto;
+
+    let uid: any;
+    let token: string;
+
     if (provider === 'kakao') {
       ({ uid, token } = await this.signInWithKakao(
-        accessToken,
+        access_token,
         this.firebaseService.getAuth(),
       ));
     }
     //푸시알림 사용할꺼면 fcmToken사용 및 db저장
 
-    return {
-      uid: uid,
-      token: token,
-      // 필요한 다른 데이터
+    const userToken: UserToken = {
+      uid,
+      token,
     };
+
+    return userToken;
   }
 
   async socialSignInWithApple(
-    id_token: string,
-    id: string,
-    first_name: string,
-    last_name: string,
-  ) {
+    socialSignInWithAppleDTO: SocialSignInWithAppleDTO,
+  ): Promise<UserToken> {
+    const { id_token, id, first_name, last_name, fcm_token } =
+      socialSignInWithAppleDTO;
+
     const { uid, token } = await this.signInWithApple(
       id_token,
       id,
@@ -218,10 +224,11 @@ export class AuthService {
     );
     //푸시알림 사용할꺼면 fcmToken사용 및 db저장
 
-    return {
-      uid: uid,
-      token: token,
-      // 필요한 다른 데이터
+    const userToken: UserToken = {
+      uid,
+      token,
     };
+
+    return userToken;
   }
 }

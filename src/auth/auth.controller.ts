@@ -11,12 +11,15 @@ import {
   LoginSuccessResponseDTO,
   MissingKakaoAccountResponseDTO,
   SocialSignInDTO,
-} from 'src/service/dto/socialSignInDTO';
+} from 'src/service/dto/auth/socialSignInDTO';
 import {
+  FAIL_DECODE_ID_TOKEN,
   FAIL_GET_KAKAO_LOGIN_INFO,
   FAIL_LOGIN_FIREBASE,
   KAKAO_ACCOUNT_REQUIRED,
 } from 'src/common/error/constants';
+import { SocialSignInWithAppleDTO } from 'src/service/dto/auth/socialSignInWithAppleDTO';
+import { FailDecodeIdToken } from 'src/service/dto/auth/common';
 
 @Controller('auth')
 export class AuthController {
@@ -77,6 +80,43 @@ export class AuthController {
       access_token,
       // fcm_token,
       provider,
+    );
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
+  @Post('/socialSignInWithApple')
+  @ApiOperation({
+    summary: '소셜 로그인 (카카오/구글)',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: '로그인 성공',
+    type: LoginSuccessResponseDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: FAIL_LOGIN_FIREBASE,
+    type: FailLoginFirebaseResponseDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: FAIL_DECODE_ID_TOKEN,
+    type: FailDecodeIdToken,
+  })
+  async socialSignInWithApple(
+    @Body() socialSignInWithAppleDTO: SocialSignInWithAppleDTO,
+  ): Promise<SerializedMessage> {
+    const { id_token, id, first_name, last_name, fcm_token } =
+      socialSignInWithAppleDTO;
+    const data = await this.authService.socialSignInWithApple(
+      id_token,
+      id,
+      first_name,
+      last_name,
+      // fcm_token,
     );
     return serializeMessage({
       code: SUCCESS_CODE,

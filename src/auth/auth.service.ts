@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthProvider, UserInfo } from 'src/common/types';
 import { signInWithKakao } from './kakao';
 import { FirebaseService } from 'src/firebase/firebase.service';
+import { signInWithApple } from './apple';
+import { Auth } from 'firebase-admin/lib/auth/auth';
 
 @Injectable()
 export class AuthService {
@@ -49,9 +51,29 @@ export class AuthService {
         this.firebaseService.getAuth(),
       ));
     }
-    //푸시알림 사용할꺼면 fcmToken사용
+    //푸시알림 사용할꺼면 fcmToken사용 및 db저장
 
-    //userData DB에 저장
+    return {
+      uid: uid,
+      token: token,
+      // 필요한 다른 데이터
+    };
+  }
+
+  async socialSignInWithApple(
+    id_token: string,
+    id: string,
+    first_name: string,
+    last_name: string,
+  ) {
+    const { uid, token } = await signInWithApple(
+      id_token,
+      id,
+      first_name,
+      last_name,
+      this.firebaseService.getAuth(),
+    );
+    //푸시알림 사용할꺼면 fcmToken사용 및 db저장
 
     return {
       uid: uid,

@@ -11,6 +11,15 @@ export interface KakaoUserInfo {
   };
 }
 
+export interface AppleUserInfo {
+  uid: string;
+  name: string;
+  email: string;
+  birthyear?: string;
+  gender?: string;
+  phone_number?: string;
+}
+
 export class SocialSignInBody {
   access_token: string;
   provider: AuthProvider;

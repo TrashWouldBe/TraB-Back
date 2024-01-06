@@ -8,13 +8,17 @@ import { authErrorCode } from 'src/common/error/errorCode';
 import {
   EMAIL_ALREADY_EXISTS,
   FAIL_DECODE_ID_TOKEN,
+  FAIL_GET_GOOGLE_LOGIN_INFO,
   FAIL_GET_KAKAO_LOGIN_INFO,
   FAIL_LOGIN_FIREBASE,
   KAKAO_ACCOUNT_REQUIRED,
 } from 'src/common/error/constants';
 import { Auth } from 'firebase-admin/lib/auth/auth';
 import { AppleUserInfo } from './types/apple-userinfo.type';
-import { AuthProvider } from './types/auth-provider.type';
+import { SocialSignInWithAppleDTO } from './dto/social-signIn-with-apple.dto';
+import { UserToken } from './types/user-token.type';
+import { SocialSignInDTO } from './dto/social-signin.dto';
+import { GoogleUserInfo } from './types/google-userinfo.type';
 
 @Injectable()
 export class AuthService {
@@ -103,6 +107,72 @@ export class AuthService {
     return this.registerKakaoUser(kakaoUserInfo, firebaseAuth);
   };
 
+  getGoogleUserInfo = async (accessToken: string) => {
+    try {
+      const { data }: { data: GoogleUserInfo } = await axios.get(
+        'https://www.googleapis.com/oauth2/v2/userinfo',
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      return data;
+    } catch (e) {
+      throw new HttpServerError(
+        {
+          code: authErrorCode.FAIL_GET_GOOGLE_LOGIN_INFO,
+          message: FAIL_GET_GOOGLE_LOGIN_INFO,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  };
+
+  registerGoogleUser = async (
+    googleUserInfo: GoogleUserInfo,
+    firebaseAuth: Auth,
+  ) => {
+    const { email, verified_email, picture } = googleUserInfo;
+    try {
+      const user = await firebaseAuth.createUser({
+        email,
+        emailVerified: verified_email,
+        photoURL: picture,
+      });
+
+      return {
+        uid: user.uid,
+        token: await firebaseAuth.createCustomToken(user.uid),
+      };
+    } catch (error: any) {
+      if (error.errorInfo.code === EMAIL_ALREADY_EXISTS) {
+        const existingUser = await firebaseAuth.getUserByEmail(email);
+        return {
+          uid: existingUser.uid,
+          token: await firebaseAuth.createCustomToken(existingUser.uid),
+        };
+      } else {
+        throw new HttpServerError(
+          {
+            code: authErrorCode.FAIL_LOGIN_FIREBASE,
+            message: FAIL_LOGIN_FIREBASE,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+  };
+
+  signInWithGoogle = async (accessToken: string, firebaseAuth: Auth) => {
+    const googleUserInfo: GoogleUserInfo = await this.getGoogleUserInfo(
+      accessToken,
+    );
+
+    return this.registerGoogleUser(googleUserInfo, firebaseAuth);
+  };
+
   getAppleUserInfo = async (
     id_token: string,
     uid: string,
@@ -182,33 +252,39 @@ export class AuthService {
     return this.registerAppleUser(appleUserInfo, firebaseAuth);
   };
 
-  async socialSignInWithKakao(
-    accessToken: string,
-    // fcmToken: string,
-    provider: AuthProvider,
-  ) {
-    let uid, token;
+  async socialSignIn(socialSignInDto: SocialSignInDTO): Promise<UserToken> {
+    const { access_token, provider /*fcm_token*/ } = socialSignInDto;
+
+    let uid: any;
+    let token: string;
+
     if (provider === 'kakao') {
       ({ uid, token } = await this.signInWithKakao(
-        accessToken,
+        access_token,
+        this.firebaseService.getAuth(),
+      ));
+    } else if (provider === 'google') {
+      ({ uid, token } = await this.signInWithGoogle(
+        access_token,
         this.firebaseService.getAuth(),
       ));
     }
     //푸시알림 사용할꺼면 fcmToken사용 및 db저장
 
-    return {
-      uid: uid,
-      token: token,
-      // 필요한 다른 데이터
+    const userToken: UserToken = {
+      uid,
+      token,
     };
+
+    return userToken;
   }
 
   async socialSignInWithApple(
-    id_token: string,
-    id: string,
-    first_name: string,
-    last_name: string,
-  ) {
+    socialSignInWithAppleDTO: SocialSignInWithAppleDTO,
+  ): Promise<UserToken> {
+    const { id_token, id, first_name, last_name, fcm_token } =
+      socialSignInWithAppleDTO;
+
     const { uid, token } = await this.signInWithApple(
       id_token,
       id,
@@ -218,10 +294,11 @@ export class AuthService {
     );
     //푸시알림 사용할꺼면 fcmToken사용 및 db저장
 
-    return {
-      uid: uid,
-      token: token,
-      // 필요한 다른 데이터
+    const userToken: UserToken = {
+      uid,
+      token,
     };
+
+    return userToken;
   }
 }

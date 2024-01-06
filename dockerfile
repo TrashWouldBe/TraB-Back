@@ -20,3 +20,4 @@ RUN npm run build
 COPY --from=build /server-code/dist /server-code/dist
 # 12
 CMD ["npm", "run", "start:dev"]
+

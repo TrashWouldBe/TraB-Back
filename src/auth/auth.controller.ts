@@ -19,9 +19,9 @@ import { UserToken } from './types/user-token.type';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/login/kakao')
+  @Post('/kakao&google')
   @ApiOperation({
-    summary: '소셜 로그인 (카카오)',
+    summary: '소셜 로그인 (카카오/구글)',
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -40,10 +40,14 @@ export class AuthController {
     status: authErrorCode.FAIL_LOGIN_FIREBASE,
     type: FailLoginFirebaseResponse,
   })
+  @ApiResponse({
+    status: authErrorCode.FAIL_GET_GOOGLE_LOGIN_INFO,
+    type: FailGetKakaoLoginInfoResponse,
+  })
   async socialSignInWithKakao(
     @Body() socialSignInDto: SocialSignInDTO,
   ): Promise<SerializedMessage> {
-    const data: UserToken = await this.authService.socialSignInWithKakao(
+    const data: UserToken = await this.authService.socialSignIn(
       socialSignInDto,
     );
     return serializeMessage({
@@ -53,7 +57,7 @@ export class AuthController {
     });
   }
 
-  @Post('/login/apple')
+  @Post('/apple')
   @ApiOperation({
     summary: '소셜 로그인 (애플)',
   })

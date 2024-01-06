@@ -6,21 +6,18 @@ import { serializeMessage } from 'src/common/utils';
 import { SUCCESS_CODE } from 'src/common/constants';
 import { SerializedMessage } from 'src/common/types';
 import {
-  FailGetKakaoLoginInfoDTO,
-  FailLoginFirebaseResponseDTO,
-  LoginSuccessResponseDTO,
-  MissingKakaoAccountResponseDTO,
+  FailGetKakaoLoginInfoResponse,
+  MissingKakaoAccountResponse,
   SocialSignInDTO,
-} from 'src/service/dto/auth/socialSignInDTO';
-import {
-  FAIL_DECODE_ID_TOKEN,
-  FAIL_GET_KAKAO_LOGIN_INFO,
-  FAIL_LOGIN_FIREBASE,
-  KAKAO_ACCOUNT_REQUIRED,
-} from 'src/common/error/constants';
-import { SocialSignInWithAppleDTO } from 'src/service/dto/auth/socialSignInWithAppleDTO';
-import { FailDecodeIdToken } from 'src/service/dto/auth/common';
+} from 'src/service/dto/auth/socialSignIn';
 
+import { authErrorCode } from 'src/common/error/errorCode';
+import {
+  FailDecodeIdTokenResponse,
+  FailLoginFirebaseResponse,
+  LoginSuccessResponse,
+} from 'src/service/dto/auth/common';
+import { SocialSignInWithAppleDTO } from 'src/service/dto/auth/socialSignInWithApple';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -37,7 +34,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description:
-      '성공: 현재는 제대로 되는지 확인하기 위해 uid를 반환하게 설정했음',
+      '성공: 현재는 제대로 되는지 확인하기 위해 uid를 반환하게 설정했 음',
   })
   @ApiResponse({
     status: 401,
@@ -55,22 +52,19 @@ export class AuthController {
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: '로그인 성공',
-    type: LoginSuccessResponseDTO,
+    type: LoginSuccessResponse,
   })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: KAKAO_ACCOUNT_REQUIRED,
-    type: MissingKakaoAccountResponseDTO,
+    status: authErrorCode.MISSING_KAKAO_ACCOUNT,
+    type: MissingKakaoAccountResponse,
   })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: FAIL_LOGIN_FIREBASE,
-    type: FailLoginFirebaseResponseDTO,
+    status: authErrorCode.FAIL_GET_KAKAO_LOGIN_INFO,
+    type: FailGetKakaoLoginInfoResponse,
   })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: FAIL_GET_KAKAO_LOGIN_INFO,
-    type: FailGetKakaoLoginInfoDTO,
+    status: authErrorCode.FAIL_LOGIN_FIREBASE,
+    type: FailLoginFirebaseResponse,
   })
   async socialSignIn(
     @Body() socialSignInDto: SocialSignInDTO,
@@ -89,22 +83,20 @@ export class AuthController {
   }
   @Post('/socialSignInWithApple')
   @ApiOperation({
-    summary: '소셜 로그인 (카카오/구글)',
+    summary: '소셜 로그인 (애플)',
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: '로그인 성공',
-    type: LoginSuccessResponseDTO,
+    type: LoginSuccessResponse,
   })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: FAIL_LOGIN_FIREBASE,
-    type: FailLoginFirebaseResponseDTO,
+    status: authErrorCode.FAIL_DECODE_ID_TOKEN,
+    type: FailDecodeIdTokenResponse,
   })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: FAIL_DECODE_ID_TOKEN,
-    type: FailDecodeIdToken,
+    status: authErrorCode.FAIL_LOGIN_FIREBASE,
+    type: FailLoginFirebaseResponse,
   })
   async socialSignInWithApple(
     @Body() socialSignInWithAppleDTO: SocialSignInWithAppleDTO,

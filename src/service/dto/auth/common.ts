@@ -5,7 +5,7 @@ import {
 } from 'src/common/error/constants';
 import { authErrorCode } from 'src/common/error/errorCode';
 
-export class LoginSuccessResponseDTO {
+export class LoginSuccessResponse {
   @ApiProperty({
     example: {
       code: 1,
@@ -21,24 +21,26 @@ export class LoginSuccessResponseDTO {
   uid: string;
 }
 
-export class FailLoginFirebaseResponseDTO {
+export class FailLoginFirebaseResponse {
   @ApiProperty({
-    example: {
-      code: authErrorCode.FAIL_LOGIN_FIREBASE,
-      message: FAIL_LOGIN_FIREBASE,
-    },
-    description: '파이어 베이스 인증 실패',
+    example: authErrorCode.FAIL_LOGIN_FIREBASE,
+    description: FAIL_LOGIN_FIREBASE,
+  })
+  code: string;
+  @ApiProperty({
+    example: FAIL_LOGIN_FIREBASE,
   })
   message: string;
 }
 
-export class FailDecodeIdToken {
+export class FailDecodeIdTokenResponse {
   @ApiProperty({
-    example: {
-      code: authErrorCode.FAIL_DECODE_ID_TOKEN,
-      message: FAIL_DECODE_ID_TOKEN,
-    },
-    description: '토큰 복호화 실패',
+    example: authErrorCode.FAIL_DECODE_ID_TOKEN,
+    description: FAIL_DECODE_ID_TOKEN,
+  })
+  code: string;
+  @ApiProperty({
+    example: FAIL_DECODE_ID_TOKEN,
   })
   message: string;
 }

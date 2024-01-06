@@ -3,7 +3,6 @@ import { AuthProvider, UserInfo } from 'src/common/types';
 import { signInWithKakao } from './kakao';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { signInWithApple } from './apple';
-import { Auth } from 'firebase-admin/lib/auth/auth';
 
 @Injectable()
 export class AuthService {

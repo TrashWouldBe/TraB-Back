@@ -1,13 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  FAIL_GET_KAKAO_LOGIN_INFO,
+  FAIL_DECODE_ID_TOKEN,
   FAIL_LOGIN_FIREBASE,
-  KAKAO_ACCOUNT_REQUIRED,
 } from 'src/common/error/constants';
 import { authErrorCode } from 'src/common/error/errorCode';
-import { AuthProvider } from 'src/common/types';
 
-export class LoginSuccessResponseDTO {
+export class LoginSuccessResponse {
   @ApiProperty({
     example: {
       code: 1,
@@ -23,55 +21,26 @@ export class LoginSuccessResponseDTO {
   uid: string;
 }
 
-export class MissingKakaoAccountResponseDTO {
+export class FailLoginFirebaseResponse {
   @ApiProperty({
-    example: {
-      code: authErrorCode.MISSING_KAKAO_ACCOUNT,
-      message: KAKAO_ACCOUNT_REQUIRED,
-    },
-    description: '카카오 계정 없음',
+    example: authErrorCode.FAIL_LOGIN_FIREBASE,
+    description: FAIL_LOGIN_FIREBASE,
+  })
+  code: string;
+  @ApiProperty({
+    example: FAIL_LOGIN_FIREBASE,
   })
   message: string;
 }
 
-export class FailLoginFirebaseResponseDTO {
+export class FailDecodeIdTokenResponse {
   @ApiProperty({
-    example: {
-      code: authErrorCode.FAIL_LOGIN_FIREBASE,
-      message: FAIL_LOGIN_FIREBASE,
-    },
-    description: '파이어 베이스 인증 실패',
+    example: authErrorCode.FAIL_DECODE_ID_TOKEN,
+    description: FAIL_DECODE_ID_TOKEN,
+  })
+  code: string;
+  @ApiProperty({
+    example: FAIL_DECODE_ID_TOKEN,
   })
   message: string;
-}
-
-export class FailGetKakaoLoginInfoDTO {
-  @ApiProperty({
-    example: {
-      code: authErrorCode.FAIL_GET_KAKAO_LOGIN_INFO,
-      message: FAIL_GET_KAKAO_LOGIN_INFO,
-    },
-    description: '카카오 로그인 정보 불러오기 실패',
-  })
-  message: string;
-}
-
-export class SocialSignInDTO {
-  @ApiProperty({
-    example: '0ZK6WTjgrMYdaUSSO-Utmcvr4DXHp5HIdC4KPXTbAAABjNrxylZb9Pmr5eg_ZA',
-    description: '소셜 서비스에서 제공하는 액세스 토큰',
-  })
-  access_token: string;
-
-  @ApiProperty({
-    example: 'kakao',
-    description: '소셜 서비스 제공자 (예: "kakao", "google", "facebook")',
-  })
-  provider: AuthProvider;
-
-  @ApiProperty({
-    example: '여기에_FCM_토큰을_입력',
-    description: 'FCM 토큰',
-  })
-  fcm_token: string;
 }

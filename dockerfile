@@ -1,23 +1,27 @@
 # STEP 1
-# copy server code.
-RUN mkdir /server-code
-WORKDIR /server-code
-ADD package-lock.json /server-code
-ADD package.json /server-code
-ADD ./tsconfig.json /server-code/tsconfig.json
+# 1
+FROM --platform=linux/amd64 node:21 AS builder
+# 2
+WORKDIR /app
+# 3
+COPY . .
+# 4
 RUN npm install
-ADD ./src /server-code/src
-WORKDIR /server-code
+# 5
+RUN npm ci
+# 6
 RUN npm run build
 
-FROM node:16-slim
-
-RUN mkdir /server-code
-WORKDIR /server-code
-ADD package.json /server-code
-ADD package-lock.json /server-code
-RUN npm run build
-COPY --from=build /server-code/dist /server-code/dist
+# STEP 2
+# 7
+FROM --platform=linux/amd64 node:21-alpine
+# 8
+WORKDIR /app
+# 9
+ENV NODE_ENV production
+# 10
+COPY --from=builder /app ./
+# 11
+EXPOSE 3000
 # 12
 CMD ["npm", "run", "start:dev"]
-

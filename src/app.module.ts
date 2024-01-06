@@ -4,9 +4,22 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { typeOrmConfig } from './config/typeorm.config';
+import { UserModule } from './user/user.module';
+import { TrabModule } from './trab/trab.module';
+import { PloggingModule } from './plogging/plogging.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, FirebaseModule],
+  imports: [
+    ConfigModule.forRoot(),
+    AuthModule,
+    FirebaseModule,
+    TypeOrmModule.forRootAsync(typeOrmConfig),
+    UserModule,
+    TrabModule,
+    PloggingModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

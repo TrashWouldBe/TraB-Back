@@ -2,7 +2,7 @@
 # copy server code.
 RUN mkdir /server-code
 WORKDIR /server-code
-ADD yarn.lock /server-code
+ADD package-lock.json /server-code
 ADD package.json /server-code
 ADD ./tsconfig.json /server-code/tsconfig.json
 RUN npm install

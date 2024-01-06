@@ -1,4 +1,4 @@
-import { SerializedMessage } from './types';
+import { SerializedMessage } from '../types/serialized-message.type';
 
 export const serializeMessage = ({
   code,

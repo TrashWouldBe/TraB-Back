@@ -1,50 +1,28 @@
 import { Body, Controller, HttpStatus, Post, Req } from '@nestjs/common';
 // import { LoginResultType } from 'src/common/constant/login-result-type';
 import { AuthService } from './auth.service';
-import { ApiHeader, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { serializeMessage } from 'src/common/utils';
-import { SUCCESS_CODE } from 'src/common/constants';
-import { SerializedMessage } from 'src/common/types';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { serializeMessage } from 'src/common/utils/serialize-message';
+import { SUCCESS_CODE } from 'src/common/constants/constants';
+import { SerializedMessage } from 'src/common/types/serialized-message.type';
 import {
   FailGetKakaoLoginInfoResponse,
   MissingKakaoAccountResponse,
   SocialSignInDTO,
-} from 'src/service/dto/auth/socialSignIn';
-
+} from 'src/swagger/dto/auth/socialSignIn';
 import { authErrorCode } from 'src/common/error/errorCode';
 import {
   FailDecodeIdTokenResponse,
   FailLoginFirebaseResponse,
   LoginSuccessResponse,
-} from 'src/service/dto/auth/common';
-import { SocialSignInWithAppleDTO } from 'src/service/dto/auth/socialSignInWithApple';
+} from 'src/swagger/dto/auth/common';
+import { SocialSignInWithAppleDTO } from 'src/swagger/dto/auth/socialSignInWithApple';
+
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/login')
-  @ApiOperation({
-    summary: '로그인 API',
-  })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer 토큰을 여기에 추가',
-    required: true,
-  })
-  @ApiResponse({
-    status: 200,
-    description:
-      '성공: 현재는 제대로 되는지 확인하기 위해 uid를 반환하게 설정했 음',
-  })
-  @ApiResponse({
-    status: 401,
-    description:
-      '실패: 로그인 실패 - no token이라면 토큰 파싱 과정에서 문제, token info error라면 token은 읽었는데 인증관련 문제',
-  })
-  async login(@Req() request: Request): Promise<string> {
-    const result: string = await this.authService.validateUser(request);
-    return result;
-  }
   @Post('/socialSignIn')
   @ApiOperation({
     summary: '소셜 로그인 (카카오/구글)',
@@ -70,7 +48,7 @@ export class AuthController {
     @Body() socialSignInDto: SocialSignInDTO,
   ): Promise<SerializedMessage> {
     const { access_token, provider /*fcm_token*/ } = socialSignInDto;
-    const data = await this.authService.socialSignIn(
+    const data = await this.authService.socialSignInWithKakao(
       access_token,
       // fcm_token,
       provider,

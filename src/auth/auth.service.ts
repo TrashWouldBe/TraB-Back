@@ -1,51 +1,195 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthProvider, UserInfo } from 'src/common/types';
-import { signInWithKakao } from './kakao';
+import * as jwt from 'jsonwebtoken';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { FirebaseService } from 'src/firebase/firebase.service';
-import { signInWithApple } from './apple';
+import { KakaoUserInfo } from './types/kakao-userinfo.type';
+import axios from 'axios';
+import { HttpServerError } from 'src/common/error/errorHandler';
+import { authErrorCode } from 'src/common/error/errorCode';
+import {
+  EMAIL_ALREADY_EXISTS,
+  FAIL_DECODE_ID_TOKEN,
+  FAIL_GET_KAKAO_LOGIN_INFO,
+  FAIL_LOGIN_FIREBASE,
+  KAKAO_ACCOUNT_REQUIRED,
+} from 'src/common/error/constants';
+import { Auth } from 'firebase-admin/lib/auth/auth';
+import { AppleUserInfo } from './types/apple-userinfo.type';
+import { AuthProvider } from './types/auth-provider.type';
 
 @Injectable()
 export class AuthService {
   constructor(private firebaseService: FirebaseService) {}
-  async validateUser(request: Request): Promise<string> {
+
+  getKakaoUserInfo = async (accessToken: string) => {
     try {
-      let idToken: string | null = null;
-      if (
-        request.headers['authorization'] &&
-        request.headers['authorization'].startsWith('Bearer')
-      ) {
-        idToken = request.headers['authorization'].split('Bearer ')[1];
-      } else {
-        throw new UnauthorizedException('login fail : no token');
-      }
-
-      let userInfo: UserInfo;
-      await this.firebaseService
-        .getAuth()
-        .verifyIdToken(idToken)
-        .then((decodedToken) => {
-          userInfo = {
-            uid: decodedToken.uid,
-            email: decodedToken.email,
-          };
-        })
-        .catch(() => {
-          throw new UnauthorizedException('login fail : token info error');
-        });
-      return userInfo.uid;
-    } catch (err) {
-      throw err;
+      const { data }: { data: KakaoUserInfo } = await axios.get(
+        'https://kapi.kakao.com/v2/user/me',
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+          },
+        },
+      );
+      return data;
+    } catch (e) {
+      throw new HttpServerError(
+        {
+          code: authErrorCode.FAIL_GET_KAKAO_LOGIN_INFO,
+          message: FAIL_GET_KAKAO_LOGIN_INFO,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
-  }
+  };
 
-  async socialSignIn(
+  registerKakaoUser = async (
+    kakaoUserInfo: KakaoUserInfo,
+    firebaseAuth: Auth,
+  ) => {
+    if (!kakaoUserInfo.kakao_account) {
+      throw new HttpServerError(
+        {
+          code: authErrorCode.MISSING_KAKAO_ACCOUNT,
+          message: KAKAO_ACCOUNT_REQUIRED,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    let { name, email, birthyear, phoneNumber } =
+      kakaoUserInfo.kakao_account || {};
+    if (!name) name = kakaoUserInfo.id.toString();
+    if (!email) email = `${kakaoUserInfo.id}@gmail.com`;
+    if (!birthyear) birthyear = '2000';
+    if (!phoneNumber)
+      phoneNumber = `+82 10-999-${Math.floor(Math.random() * 9999.9)
+        .toString()
+        .padStart(4, '0')}`;
+
+    //이미 firebaseauth 서버에 user가 있으면 create하지 않음
+    try {
+      const user = await firebaseAuth.createUser({
+        email,
+        displayName: name,
+        phoneNumber,
+      });
+
+      return {
+        uid: user.uid,
+        token: await firebaseAuth.createCustomToken(user.uid),
+      };
+    } catch (error: any) {
+      if (error.errorInfo.code === EMAIL_ALREADY_EXISTS) {
+        const existingUser = await firebaseAuth.getUserByEmail(email);
+        return {
+          uid: existingUser.uid,
+          token: await firebaseAuth.createCustomToken(existingUser.uid),
+        };
+      } else {
+        throw new HttpServerError(
+          {
+            code: authErrorCode.FAIL_LOGIN_FIREBASE,
+            message: FAIL_LOGIN_FIREBASE,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+  };
+
+  signInWithKakao = async (accessToken: string, firebaseAuth: Auth) => {
+    const kakaoUserInfo = await this.getKakaoUserInfo(accessToken);
+
+    return this.registerKakaoUser(kakaoUserInfo, firebaseAuth);
+  };
+
+  getAppleUserInfo = async (
+    id_token: string,
+    uid: string,
+    first_name: string,
+    last_name: string,
+  ) => {
+    const idTokenDecoded = jwt.decode(id_token);
+
+    if (!idTokenDecoded || typeof idTokenDecoded !== 'object') {
+      throw new HttpServerError(
+        {
+          code: authErrorCode.FAIL_DECODE_ID_TOKEN,
+          message: FAIL_DECODE_ID_TOKEN,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const email = idTokenDecoded.email ? idTokenDecoded.email : '';
+    const appleUserInfo: AppleUserInfo = {
+      uid: uid,
+      name: first_name + last_name,
+      email: email,
+    };
+
+    return appleUserInfo;
+  };
+
+  registerAppleUser = async (
+    appleUserInfo: AppleUserInfo,
+    firebaseAuth: Auth,
+  ) => {
+    const { uid, email, name } = appleUserInfo;
+    let user;
+    try {
+      user = await firebaseAuth.createUser({
+        email,
+        displayName: name,
+      });
+      //db에 유저정보 저장
+      return {
+        uid: user.uid,
+        token: await firebaseAuth.createCustomToken(user.uid),
+      };
+    } catch (error: any) {
+      if (error.errorInfo.code === EMAIL_ALREADY_EXISTS) {
+        const existingUser = await firebaseAuth.getUserByEmail(email);
+        return {
+          uid: existingUser.uid,
+          token: await firebaseAuth.createCustomToken(existingUser.uid),
+        };
+      } else {
+        throw new HttpServerError(
+          {
+            code: authErrorCode.FAIL_LOGIN_FIREBASE,
+            message: FAIL_LOGIN_FIREBASE,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+  };
+
+  signInWithApple = async (
+    id_token: string,
+    id: string,
+    first_name: string,
+    last_name: string,
+    firebaseAuth: Auth,
+  ) => {
+    const appleUserInfo = await this.getAppleUserInfo(
+      id_token,
+      id,
+      first_name,
+      last_name,
+    );
+    return this.registerAppleUser(appleUserInfo, firebaseAuth);
+  };
+
+  async socialSignInWithKakao(
     accessToken: string,
     // fcmToken: string,
     provider: AuthProvider,
   ) {
     let uid, token;
     if (provider === 'kakao') {
-      ({ uid, token } = await signInWithKakao(
+      ({ uid, token } = await this.signInWithKakao(
         accessToken,
         this.firebaseService.getAuth(),
       ));
@@ -65,7 +209,7 @@ export class AuthService {
     first_name: string,
     last_name: string,
   ) {
-    const { uid, token } = await signInWithApple(
+    const { uid, token } = await this.signInWithApple(
       id_token,
       id,
       first_name,

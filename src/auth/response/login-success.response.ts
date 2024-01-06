@@ -1,9 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  FAIL_DECODE_ID_TOKEN,
-  FAIL_LOGIN_FIREBASE,
-} from 'src/common/error/constants';
-import { authErrorCode } from 'src/common/error/errorCode';
 
 export class LoginSuccessResponse {
   @ApiProperty({
@@ -19,28 +14,4 @@ export class LoginSuccessResponse {
     description: '로그인 성공',
   })
   uid: string;
-}
-
-export class FailLoginFirebaseResponse {
-  @ApiProperty({
-    example: authErrorCode.FAIL_LOGIN_FIREBASE,
-    description: FAIL_LOGIN_FIREBASE,
-  })
-  code: string;
-  @ApiProperty({
-    example: FAIL_LOGIN_FIREBASE,
-  })
-  message: string;
-}
-
-export class FailDecodeIdTokenResponse {
-  @ApiProperty({
-    example: authErrorCode.FAIL_DECODE_ID_TOKEN,
-    description: FAIL_DECODE_ID_TOKEN,
-  })
-  code: string;
-  @ApiProperty({
-    example: FAIL_DECODE_ID_TOKEN,
-  })
-  message: string;
 }

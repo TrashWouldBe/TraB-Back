@@ -252,8 +252,8 @@ export class AuthService {
     return this.registerAppleUser(appleUserInfo, firebaseAuth);
   };
 
-  async socialSignIn(socialSignInDto: SocialSignInDTO): Promise<UserToken> {
-    const { access_token, provider /*fcm_token*/ } = socialSignInDto;
+  socialSignIn = async (socialSignInDto: SocialSignInDTO, provider: string) => {
+    const { access_token /*fcm_token*/ } = socialSignInDto;
 
     let uid: any;
     let token: string;
@@ -277,11 +277,11 @@ export class AuthService {
     };
 
     return userToken;
-  }
+  };
 
-  async socialSignInWithApple(
+  socialSignInWithApple = async (
     socialSignInWithAppleDTO: SocialSignInWithAppleDTO,
-  ): Promise<UserToken> {
+  ) => {
     const { id_token, id, first_name, last_name, fcm_token } =
       socialSignInWithAppleDTO;
 
@@ -300,5 +300,5 @@ export class AuthService {
     };
 
     return userToken;
-  }
+  };
 }

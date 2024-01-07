@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { serializeMessage } from 'src/common/utils/serialize-message';
@@ -19,7 +19,7 @@ import { UserToken } from './types/user-token.type';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/kakao&google')
+  @Post('/socialSignIn')
   @ApiOperation({
     summary: '소셜 로그인 (카카오/구글)',
   })
@@ -46,9 +46,11 @@ export class AuthController {
   })
   async socialSignInWithKakao(
     @Body() socialSignInDto: SocialSignInDTO,
+    @Query('provider') provider: string,
   ): Promise<SerializedMessage> {
     const data: UserToken = await this.authService.socialSignIn(
       socialSignInDto,
+      provider,
     );
     return serializeMessage({
       code: SUCCESS_CODE,
@@ -57,7 +59,7 @@ export class AuthController {
     });
   }
 
-  @Post('/apple')
+  @Post('/socialSignInWithApple')
   @ApiOperation({
     summary: '소셜 로그인 (애플)',
   })

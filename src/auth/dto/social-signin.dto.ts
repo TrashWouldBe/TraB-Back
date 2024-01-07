@@ -9,12 +9,6 @@ export class SocialSignInDTO {
   access_token: string;
 
   @ApiProperty({
-    example: 'kakao',
-    description: '소셜 서비스 제공자 (예: "kakao", "google", "facebook")',
-  })
-  provider: AuthProvider;
-
-  @ApiProperty({
     example: '여기에_FCM_토큰을_입력',
     description: 'FCM 토큰',
   })

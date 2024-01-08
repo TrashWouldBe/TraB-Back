@@ -13,7 +13,7 @@ export class Plogging{
     @Column({type : 'varchar', nullable : false})
     run_name : string;
 
-    @Column({ type : 'double', nullable : false})
+    @Column({ type : 'float', nullable : false})
     run_range : number;
 
     @Column({ type : 'time', nullable : false})

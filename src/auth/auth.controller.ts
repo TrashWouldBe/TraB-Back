@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { serializeMessage } from 'src/common/utils/serialize-message';
@@ -8,20 +8,21 @@ import { authErrorCode } from 'src/common/error/errorCode';
 import { SocialSignInWithAppleDTO } from 'src/auth/dto/social-signIn-with-apple.dto';
 import { LoginSuccessResponse } from './response/login-success.response';
 import { MissingKakaoAccountResponse } from './response/missing-kakao-account.response';
-import { FailGetKakaoLoginInfoResponse } from './response/fail-get-kakao-login-info.response';
 import { FailLoginFirebaseResponse } from './response/fail-login-firebase.response';
-import { SocialSignInDTO } from './dto/social-signin.dto';
+import { SocialSignInWithKakaoDTO } from './dto/social-signIn-with-kakao-dto';
 import { FailDecodeIdTokenResponse } from './response/fail-decode-idtoken.response';
 import { UserToken } from './types/user-token.type';
+import { SocialSignInWithGoogleDTO } from './dto/social-signIn-with-google-dto';
+import { FailGetKakaoLoginInfoResponse } from './response/fail-get-kakao-login-info.response';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/kakao&google')
+  @Post('/socialSignInWithKakao')
   @ApiOperation({
-    summary: '소셜 로그인 (카카오/구글)',
+    summary: '소셜 로그인 (카카오)',
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -33,22 +34,18 @@ export class AuthController {
     type: MissingKakaoAccountResponse,
   })
   @ApiResponse({
-    status: authErrorCode.FAIL_GET_KAKAO_LOGIN_INFO,
-    type: FailGetKakaoLoginInfoResponse,
-  })
-  @ApiResponse({
     status: authErrorCode.FAIL_LOGIN_FIREBASE,
     type: FailLoginFirebaseResponse,
   })
   @ApiResponse({
-    status: authErrorCode.FAIL_GET_GOOGLE_LOGIN_INFO,
+    status: authErrorCode.FAIL_GET_KAKAO_LOGIN_INFO,
     type: FailGetKakaoLoginInfoResponse,
   })
   async socialSignInWithKakao(
-    @Body() socialSignInDto: SocialSignInDTO,
+    @Body() socialSignInWithKakaoDTO: SocialSignInWithKakaoDTO,
   ): Promise<SerializedMessage> {
-    const data: UserToken = await this.authService.socialSignIn(
-      socialSignInDto,
+    const data: UserToken = await this.authService.socialSignInWithKakao(
+      socialSignInWithKakaoDTO,
     );
     return serializeMessage({
       code: SUCCESS_CODE,
@@ -57,7 +54,33 @@ export class AuthController {
     });
   }
 
-  @Post('/apple')
+  @Post('/socialSignInWithGoogle')
+  @ApiOperation({
+    summary: '소셜 로그인 (구글)',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: '로그인 성공',
+    type: LoginSuccessResponse,
+  })
+  @ApiResponse({
+    status: authErrorCode.FAIL_LOGIN_FIREBASE,
+    type: FailLoginFirebaseResponse,
+  })
+  async socialSignInWithGoogle(
+    @Body() socialSignInWithGoogleDTO: SocialSignInWithGoogleDTO,
+  ): Promise<SerializedMessage> {
+    const data: UserToken = await this.authService.socialSignInWithGoogle(
+      socialSignInWithGoogleDTO,
+    );
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
+
+  @Post('/socialSignInWithApple')
   @ApiOperation({
     summary: '소셜 로그인 (애플)',
   })

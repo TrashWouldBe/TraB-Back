@@ -3,8 +3,5 @@ export interface KakaoUserInfo {
   kakao_account?: {
     name?: string;
     email?: string;
-    birthyear?: string;
-    gender?: string;
-    phoneNumber?: string;
   };
 }

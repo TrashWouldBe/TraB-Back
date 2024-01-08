@@ -8,7 +8,6 @@ import { authErrorCode } from 'src/common/error/errorCode';
 import {
   EMAIL_ALREADY_EXISTS,
   FAIL_DECODE_ID_TOKEN,
-  FAIL_GET_GOOGLE_LOGIN_INFO,
   FAIL_GET_KAKAO_LOGIN_INFO,
   FAIL_LOGIN_FIREBASE,
   KAKAO_ACCOUNT_REQUIRED,
@@ -17,8 +16,9 @@ import { Auth } from 'firebase-admin/lib/auth/auth';
 import { AppleUserInfo } from './types/apple-userinfo.type';
 import { SocialSignInWithAppleDTO } from './dto/social-signIn-with-apple.dto';
 import { UserToken } from './types/user-token.type';
-import { SocialSignInDTO } from './dto/social-signin.dto';
+import { SocialSignInWithKakaoDTO } from './dto/social-signIn-with-kakao-dto';
 import { GoogleUserInfo } from './types/google-userinfo.type';
+import { SocialSignInWithGoogleDTO } from './dto/social-signIn-with-google-dto';
 
 @Injectable()
 export class AuthService {
@@ -60,22 +60,15 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    let { name, email, birthyear, phoneNumber } =
-      kakaoUserInfo.kakao_account || {};
+    let { name, email } = kakaoUserInfo.kakao_account || {};
     if (!name) name = kakaoUserInfo.id.toString();
     if (!email) email = `${kakaoUserInfo.id}@gmail.com`;
-    if (!birthyear) birthyear = '2000';
-    if (!phoneNumber)
-      phoneNumber = `+82 10-999-${Math.floor(Math.random() * 9999.9)
-        .toString()
-        .padStart(4, '0')}`;
 
     //이미 firebaseauth 서버에 user가 있으면 create하지 않음
     try {
       const user = await firebaseAuth.createUser({
         email,
         displayName: name,
-        phoneNumber,
       });
 
       return {
@@ -107,39 +100,16 @@ export class AuthService {
     return this.registerKakaoUser(kakaoUserInfo, firebaseAuth);
   };
 
-  getGoogleUserInfo = async (accessToken: string) => {
-    try {
-      const { data }: { data: GoogleUserInfo } = await axios.get(
-        'https://www.googleapis.com/oauth2/v2/userinfo',
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
-
-      return data;
-    } catch (e) {
-      throw new HttpServerError(
-        {
-          code: authErrorCode.FAIL_GET_GOOGLE_LOGIN_INFO,
-          message: FAIL_GET_GOOGLE_LOGIN_INFO,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  };
-
   registerGoogleUser = async (
     googleUserInfo: GoogleUserInfo,
     firebaseAuth: Auth,
   ) => {
-    const { email, verified_email, picture } = googleUserInfo;
+    const { email, name, profileImage } = googleUserInfo;
     try {
       const user = await firebaseAuth.createUser({
         email,
-        emailVerified: verified_email,
-        photoURL: picture,
+        displayName: name,
+        photoURL: profileImage,
       });
 
       return {
@@ -163,14 +133,6 @@ export class AuthService {
         );
       }
     }
-  };
-
-  signInWithGoogle = async (accessToken: string, firebaseAuth: Auth) => {
-    const googleUserInfo: GoogleUserInfo = await this.getGoogleUserInfo(
-      accessToken,
-    );
-
-    return this.registerGoogleUser(googleUserInfo, firebaseAuth);
   };
 
   getAppleUserInfo = async (
@@ -252,30 +214,35 @@ export class AuthService {
     return this.registerAppleUser(appleUserInfo, firebaseAuth);
   };
 
-  socialSignIn = async (socialSignInDto: SocialSignInDTO, provider: string) => {
-    const { access_token /*fcm_token*/ } = socialSignInDto;
+  socialSignInWithKakao = async (
+    socialSignInWithKakaoDTO: SocialSignInWithKakaoDTO,
+  ) => {
+    const { access_token /*fcm_token*/ } = socialSignInWithKakaoDTO;
 
-    let uid: any;
-    let token: string;
+    const userToken: UserToken = await this.signInWithKakao(
+      access_token,
+      this.firebaseService.getAuth(),
+    );
 
-    if (provider === 'kakao') {
-      ({ uid, token } = await this.signInWithKakao(
-        access_token,
-        this.firebaseService.getAuth(),
-      ));
-    } else if (provider === 'google') {
-      ({ uid, token } = await this.signInWithGoogle(
-        access_token,
-        this.firebaseService.getAuth(),
-      ));
-    }
     //푸시알림 사용할꺼면 fcmToken사용 및 db저장
 
-    const userToken: UserToken = {
-      uid,
-      token,
-    };
+    return userToken;
+  };
 
+  socialSignInWithGoogle = async (
+    socialSignInWithGoogle: SocialSignInWithGoogleDTO,
+  ) => {
+    const { name, profileImage, email, fcm_token } = socialSignInWithGoogle;
+    const userToken: UserToken = await this.registerGoogleUser(
+      {
+        email,
+        name,
+        profileImage,
+      },
+      this.firebaseService.getAuth(),
+    );
+
+    //푸시알림 사용할꺼면 fcmToken사용 및 db저장
     return userToken;
   };
 

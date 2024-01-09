@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { TrabModule } from './trab/trab.module';
 import { PloggingModule } from './plogging/plogging.module';
 import { SnackModule } from './snack/snack.module';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SnackModule } from './snack/snack.module';
     TrabModule,
     PloggingModule,
     SnackModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,7 +1,6 @@
 import { Bucket, Storage } from '@google-cloud/storage';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import path from 'path';
 
 @Injectable()
 export class ImageService {
@@ -10,13 +9,13 @@ export class ImageService {
 
   constructor(private configService: ConfigService) {
     this.storage = new Storage({
-      keyFilename: JSON.parse(configService.get<string>('CLOUD_STORAGE_KEY')),
+      credentials: JSON.parse(configService.get<string>('CLOUD_STORAGE_KEY')),
     });
     this.bucket = this.storage.bucket('trab-image');
   }
 
-  async uploadImage(image: Express.Multer.File): Promise<void> {
-    const filePath = path.join('trab-image/profile-image', image.filename);
-    const file = this.bucket.file(filePath);
+  async uploadImage(image: Express.Multer.File): Promise<string> {
+    await this.bucket.file('profile-image/image.png').save(image.buffer);
+    return `https://storage.googleapis.com/${this.bucket.name}/image.png`;
   }
 }

@@ -241,7 +241,6 @@ export class AuthService {
       },
       this.firebaseService.getAuth(),
     );
-
     //푸시알림 사용할꺼면 fcmToken사용 및 db저장
     return userToken;
   }

@@ -214,9 +214,9 @@ export class AuthService {
     return this.registerAppleUser(appleUserInfo, firebaseAuth);
   };
 
-  socialSignInWithKakao = async (
+  async socialSignInWithKakao(
     socialSignInWithKakaoDTO: SocialSignInWithKakaoDTO,
-  ) => {
+  ): Promise<UserToken> {
     const { access_token /*fcm_token*/ } = socialSignInWithKakaoDTO;
 
     const userToken: UserToken = await this.signInWithKakao(
@@ -227,11 +227,11 @@ export class AuthService {
     //푸시알림 사용할꺼면 fcmToken사용 및 db저장
 
     return userToken;
-  };
+  }
 
-  socialSignInWithGoogle = async (
+  async socialSignInWithGoogle(
     socialSignInWithGoogle: SocialSignInWithGoogleDTO,
-  ) => {
+  ): Promise<UserToken> {
     const { name, profileImage, email, fcm_token } = socialSignInWithGoogle;
     const userToken: UserToken = await this.registerGoogleUser(
       {
@@ -244,11 +244,11 @@ export class AuthService {
 
     //푸시알림 사용할꺼면 fcmToken사용 및 db저장
     return userToken;
-  };
+  }
 
-  socialSignInWithApple = async (
+  async socialSignInWithApple(
     socialSignInWithAppleDTO: SocialSignInWithAppleDTO,
-  ) => {
+  ): Promise<UserToken> {
     const { id_token, id, first_name, last_name, fcm_token } =
       socialSignInWithAppleDTO;
 
@@ -267,5 +267,5 @@ export class AuthService {
     };
 
     return userToken;
-  };
+  }
 }

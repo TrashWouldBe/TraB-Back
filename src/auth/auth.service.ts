@@ -19,10 +19,14 @@ import { UserToken } from './types/user-token.type';
 import { SocialSignInWithKakaoDTO } from './dto/social-signIn-with-kakao-dto';
 import { GoogleUserInfo } from './types/google-userinfo.type';
 import { SocialSignInWithGoogleDTO } from './dto/social-signIn-with-google-dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private firebaseService: FirebaseService) {}
+  constructor(
+    private firebaseService: FirebaseService,
+    private readonly userService: UserService,
+  ) {}
 
   getKakaoUserInfo = async (accessToken: string) => {
     try {
@@ -71,6 +75,8 @@ export class AuthService {
         displayName: name,
       });
 
+      this.userService.createUser(email);
+
       return {
         uid: user.uid,
         token: await firebaseAuth.createCustomToken(user.uid),
@@ -111,6 +117,8 @@ export class AuthService {
         displayName: name,
         photoURL: profileImage,
       });
+
+      await this.userService.createUser(email);
 
       return {
         uid: user.uid,
@@ -174,7 +182,9 @@ export class AuthService {
         email,
         displayName: name,
       });
-      //db에 유저정보 저장
+
+      this.userService.createUser(email);
+
       return {
         uid: user.uid,
         token: await firebaseAuth.createCustomToken(user.uid),

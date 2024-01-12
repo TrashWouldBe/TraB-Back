@@ -9,6 +9,8 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './user/user.module';
 import { TrabModule } from './trab/trab.module';
 import { PloggingModule } from './plogging/plogging.module';
+import { SnackModule } from './snack/snack.module';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { PloggingModule } from './plogging/plogging.module';
     UserModule,
     TrabModule,
     PloggingModule,
+    SnackModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

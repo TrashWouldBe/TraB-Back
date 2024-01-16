@@ -1,5 +1,5 @@
 import { Bucket, Storage } from '@google-cloud/storage';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -25,12 +25,14 @@ export class ImageService {
         return `https://storage.googleapis.com/${this.bucket.name}/image.png`;
       } else if (type === 'profile') {
         await this.bucket
-          .file(`profile-image/${param}/${param}.png`)
+          .file(`profile-image/${param}/image.png`)
           .save(image.buffer);
-        return `https://storage.googleapis.com/${this.bucket.name}/${param}.png`;
+        return `https://storage.googleapis.com/${this.bucket.name}/profile-image/${param}/image.png`;
       }
     } catch (error) {
-      throw error;
+      throw new InternalServerErrorException(
+        '이미지를 저장하는 과정에서 오류가 발생했습니다.',
+      );
     }
   }
 }

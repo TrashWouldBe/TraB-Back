@@ -14,8 +14,7 @@ export class SocialSignInWithGoogleDTO {
   name: string;
 
   @ApiProperty({
-    example:
-      'https://lh3.googleusercontent.com/a/ACg8ocJJG2Yc3y1ogPldjkcKNHZPzzBxazUYyxC6MSrdojFz=s1337',
+    example: 'https://lh3.googleusercontent.com/a/ACg8ocJJG2Yc3y1ogPldjkcKNHZPzzBxazUYyxC6MSrdojFz=s1337',
     description: '프로필 이미지',
   })
   profileImage: string;

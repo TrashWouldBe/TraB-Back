@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotAcceptableException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -18,11 +14,7 @@ export class UserService {
     private readonly imageService: ImageService,
   ) {}
 
-  async createUser(
-    uid: string,
-    email: string,
-    image: string | null,
-  ): Promise<void> {
+  async createUser(uid: string, email: string, image: string | null): Promise<void> {
     try {
       if (!email) {
         throw new NotAcceptableException('이메일 입력이 없습니다.');
@@ -49,9 +41,7 @@ export class UserService {
       const uid: string = decodedIdToken.user_id;
 
       if (!uid) {
-        throw new NotAcceptableException(
-          'Token에서 uid를 발견하지 못했습니다.',
-        );
+        throw new NotAcceptableException('Token에서 uid를 발견하지 못했습니다.');
       }
 
       return uid;
@@ -100,27 +90,18 @@ export class UserService {
         .execute();
 
       if (result.affected === 0) {
-        throw new NotAcceptableException(
-          '지우는 과정에서 오류가 발생했습니다.',
-        );
+        throw new NotAcceptableException('지우는 과정에서 오류가 발생했습니다.');
       }
     } catch (error) {
       throw error;
     }
   }
 
-  async changeUserImage(
-    idToken: string,
-    image: Express.Multer.File,
-  ): Promise<string> {
+  async changeUserImage(idToken: string, image: Express.Multer.File): Promise<string> {
     try {
       const uid: string = await this.decodeToken(idToken);
 
-      const imageUrl: string = await this.imageService.uploadImage(
-        image,
-        'profile',
-        uid,
-      );
+      const imageUrl: string = await this.imageService.uploadImage(image, 'profile', uid);
 
       const result = await this.userRepository
         .createQueryBuilder()
@@ -130,9 +111,7 @@ export class UserService {
         .execute();
 
       if (result.affected === 0) {
-        throw new NotAcceptableException(
-          '디비 저장과정에서 오류가 발생했습니다.',
-        );
+        throw new NotAcceptableException('디비 저장과정에서 오류가 발생했습니다.');
       }
 
       return imageUrl;

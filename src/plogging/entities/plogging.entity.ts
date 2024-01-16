@@ -1,12 +1,5 @@
 import { Trab } from 'src/trab/entities/trab.entity';
-import {
-  Column,
-  DeleteDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('plogging')
 export class Plogging {

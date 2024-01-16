@@ -1,12 +1,5 @@
 import { User } from 'src/user/entities/user.entity';
-import {
-  Column,
-  DeleteDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('trab')
 export class Trab {

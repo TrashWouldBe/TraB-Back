@@ -23,22 +23,16 @@ import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private firebaseService: FirebaseService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private firebaseService: FirebaseService, private readonly userService: UserService) {}
 
   getKakaoUserInfo = async (accessToken: string) => {
     try {
-      const { data }: { data: KakaoUserInfo } = await axios.get(
-        'https://kapi.kakao.com/v2/user/me',
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-          },
+      const { data }: { data: KakaoUserInfo } = await axios.get('https://kapi.kakao.com/v2/user/me', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
         },
-      );
+      });
       return data;
     } catch (e) {
       throw new HttpServerError(
@@ -51,10 +45,7 @@ export class AuthService {
     }
   };
 
-  registerKakaoUser = async (
-    kakaoUserInfo: KakaoUserInfo,
-    firebaseAuth: Auth,
-  ) => {
+  registerKakaoUser = async (kakaoUserInfo: KakaoUserInfo, firebaseAuth: Auth) => {
     if (!kakaoUserInfo.kakao_account) {
       throw new HttpServerError(
         {
@@ -106,10 +97,7 @@ export class AuthService {
     return this.registerKakaoUser(kakaoUserInfo, firebaseAuth);
   };
 
-  registerGoogleUser = async (
-    googleUserInfo: GoogleUserInfo,
-    firebaseAuth: Auth,
-  ) => {
+  registerGoogleUser = async (googleUserInfo: GoogleUserInfo, firebaseAuth: Auth) => {
     const { email, name, profileImage } = googleUserInfo;
     try {
       const user = await firebaseAuth.createUser({
@@ -143,12 +131,7 @@ export class AuthService {
     }
   };
 
-  getAppleUserInfo = async (
-    id_token: string,
-    uid: string,
-    first_name: string,
-    last_name: string,
-  ) => {
+  getAppleUserInfo = async (id_token: string, uid: string, first_name: string, last_name: string) => {
     const idTokenDecoded = jwt.decode(id_token);
 
     if (!idTokenDecoded || typeof idTokenDecoded !== 'object') {
@@ -171,10 +154,7 @@ export class AuthService {
     return appleUserInfo;
   };
 
-  registerAppleUser = async (
-    appleUserInfo: AppleUserInfo,
-    firebaseAuth: Auth,
-  ) => {
+  registerAppleUser = async (appleUserInfo: AppleUserInfo, firebaseAuth: Auth) => {
     const { uid, email, name } = appleUserInfo;
     let user;
     try {
@@ -208,40 +188,22 @@ export class AuthService {
     }
   };
 
-  signInWithApple = async (
-    id_token: string,
-    id: string,
-    first_name: string,
-    last_name: string,
-    firebaseAuth: Auth,
-  ) => {
-    const appleUserInfo = await this.getAppleUserInfo(
-      id_token,
-      id,
-      first_name,
-      last_name,
-    );
+  signInWithApple = async (id_token: string, id: string, first_name: string, last_name: string, firebaseAuth: Auth) => {
+    const appleUserInfo = await this.getAppleUserInfo(id_token, id, first_name, last_name);
     return this.registerAppleUser(appleUserInfo, firebaseAuth);
   };
 
-  async socialSignInWithKakao(
-    socialSignInWithKakaoDTO: SocialSignInWithKakaoDTO,
-  ): Promise<UserToken> {
+  async socialSignInWithKakao(socialSignInWithKakaoDTO: SocialSignInWithKakaoDTO): Promise<UserToken> {
     const { access_token /*fcm_token*/ } = socialSignInWithKakaoDTO;
 
-    const userToken: UserToken = await this.signInWithKakao(
-      access_token,
-      this.firebaseService.getAuth(),
-    );
+    const userToken: UserToken = await this.signInWithKakao(access_token, this.firebaseService.getAuth());
 
     //푸시알림 사용할꺼면 fcmToken사용 및 db저장
 
     return userToken;
   }
 
-  async socialSignInWithGoogle(
-    socialSignInWithGoogle: SocialSignInWithGoogleDTO,
-  ): Promise<UserToken> {
+  async socialSignInWithGoogle(socialSignInWithGoogle: SocialSignInWithGoogleDTO): Promise<UserToken> {
     const { name, profileImage, email, fcm_token } = socialSignInWithGoogle;
     const userToken: UserToken = await this.registerGoogleUser(
       {
@@ -255,11 +217,8 @@ export class AuthService {
     return userToken;
   }
 
-  async socialSignInWithApple(
-    socialSignInWithAppleDTO: SocialSignInWithAppleDTO,
-  ): Promise<UserToken> {
-    const { id_token, id, first_name, last_name, fcm_token } =
-      socialSignInWithAppleDTO;
+  async socialSignInWithApple(socialSignInWithAppleDTO: SocialSignInWithAppleDTO): Promise<UserToken> {
+    const { id_token, id, first_name, last_name, fcm_token } = socialSignInWithAppleDTO;
 
     const { uid, token } = await this.signInWithApple(
       id_token,

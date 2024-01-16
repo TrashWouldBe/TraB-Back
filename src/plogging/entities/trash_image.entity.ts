@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  JoinColumn,
-  DeleteDateColumn,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, JoinColumn, DeleteDateColumn } from 'typeorm';
 import { Plogging } from './plogging.entity';
 
 @Entity('trash_image')

@@ -7,5 +7,6 @@ import { ConfigModule } from '@nestjs/config';
   imports: [ConfigModule],
   controllers: [ImageController],
   providers: [ImageService],
+  exports: [ImageService],
 })
 export class ImageModule {}

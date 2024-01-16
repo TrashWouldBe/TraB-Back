@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post, Query } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { serializeMessage } from 'src/common/utils/serialize-message';

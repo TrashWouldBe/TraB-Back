@@ -38,11 +38,11 @@ export class ImageController {
   })
   @ApiResponse({
     status: 201,
-    description: '성공: 이미지가 업로드 되었습니다',
+    description: '성공: 이미지 업로드 성공',
   })
   @ApiResponse({
-    status: 400,
-    description: 'Bad Request',
+    status: 500,
+    description: '실패: 이미지 저장 오류',
   })
   async uploadImage(
     @UploadedFile() image: Express.Multer.File,

@@ -75,7 +75,7 @@ export class AuthService {
         displayName: name,
       });
 
-      this.userService.createUser(email);
+      this.userService.createUser(user.uid, email, null);
 
       return {
         uid: user.uid,
@@ -118,7 +118,7 @@ export class AuthService {
         photoURL: profileImage,
       });
 
-      await this.userService.createUser(email);
+      await this.userService.createUser(user.uid, email, profileImage);
 
       return {
         uid: user.uid,
@@ -183,7 +183,7 @@ export class AuthService {
         displayName: name,
       });
 
-      this.userService.createUser(email);
+      this.userService.createUser(user.uid, email, null);
 
       return {
         uid: user.uid,

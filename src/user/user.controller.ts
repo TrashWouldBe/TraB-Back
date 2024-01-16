@@ -2,12 +2,13 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
-  Put,
+  Patch,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
@@ -24,6 +25,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('/info')
+  @ApiBearerAuth('id_token')
   @ApiOperation({
     summary: '유저 정보를 가져오는 api',
   })
@@ -37,25 +39,39 @@ export class UserController {
     description: '실패: 유저를 찾을 수 없음',
   })
   @ApiResponse({
+    status: 406,
+    description: '실패: 토큰오류',
+  })
+  @ApiResponse({
     status: 500,
     description: '실패: 서버 자체 오류',
   })
-  async getUserInfo(
-    @Headers('Authorization') idToken: string,
-  ): Promise<UserInfoDto> {
-    return this.userService.getUserInfo(idToken);
+  async getUserInfo(@Req() request: Request): Promise<UserInfoDto> {
+    const token: string = request.headers['authorization'];
+    return this.userService.getUserInfo(token);
   }
 
-  @Put('/delete')
+  @Delete('/delete')
+  @ApiBearerAuth('id_token')
   @ApiOperation({
     summary: '유저를 삭제하는 api',
   })
-  async deleteUser(@Headers('Authorization') idToken: string): Promise<void> {
-    return this.userService.deleteUser(idToken);
+  @ApiResponse({
+    status: 200,
+    description: '성공: 유저 삭제 성공',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 오류',
+  })
+  async deleteUser(@Req() request: Request): Promise<void> {
+    const token: string = request.headers['authorization'];
+    return this.userService.deleteUser(token);
   }
 
   @UseInterceptors(FileInterceptor('image'))
-  @Delete('/image')
+  @Patch('/image')
+  @ApiBearerAuth('id_token')
   @ApiOperation({
     summary: '유저 이미지를 변경하는 api',
   })
@@ -76,13 +92,18 @@ export class UserController {
     description: '성공: 이미지 변경 완료',
   })
   @ApiResponse({
-    status: 400,
-    description: '실패',
+    status: 406,
+    description: '실패: 디비 저장과정에서 오류',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 오류',
   })
   async updateUserImage(
-    @Headers('Authorization') idToken: string,
+    @Req() request: Request,
     @UploadedFile() image: Express.Multer.File,
   ): Promise<string> {
-    return this.userService.changeUserImage(idToken, image);
+    const token: string = request.headers['authorization'];
+    return this.userService.changeUserImage(token, image);
   }
 }

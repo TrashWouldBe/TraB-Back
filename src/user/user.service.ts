@@ -42,11 +42,22 @@ export class UserService {
   }
 
   async decodeToken(idToken: string): Promise<string> {
-    const bearerIdToken: string = idToken.substring(7);
-    const decodedIdToken: any = jwt.decode(bearerIdToken);
+    try {
+      const bearerIdToken: string = idToken.substring(7);
+      const decodedIdToken: any = jwt.decode(bearerIdToken);
 
-    const uid: string = decodedIdToken.uid;
-    return uid;
+      const uid: string = decodedIdToken.user_id;
+
+      if (!uid) {
+        throw new NotAcceptableException(
+          'Token에서 uid를 발견하지 못했습니다.',
+        );
+      }
+
+      return uid;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getUserInfo(idToken: string): Promise<UserInfoDto> {
@@ -82,11 +93,17 @@ export class UserService {
     try {
       const uid: string = await this.decodeToken(idToken);
 
-      await this.userRepository
+      const result = await this.userRepository
         .createQueryBuilder()
         .softDelete()
         .where('uid = :uid', { uid: uid })
         .execute();
+
+      if (result.affected === 0) {
+        throw new NotAcceptableException(
+          '지우는 과정에서 오류가 발생했습니다.',
+        );
+      }
     } catch (error) {
       throw error;
     }
@@ -105,13 +122,18 @@ export class UserService {
         uid,
       );
 
-      await this.userRepository
+      const result = await this.userRepository
         .createQueryBuilder()
         .update(User)
         .set({ image: imageUrl })
         .where('uid = :uid', { uid: uid })
         .execute();
 
+      if (result.affected === 0) {
+        throw new NotAcceptableException(
+          '디비 저장과정에서 오류가 발생했습니다.',
+        );
+      }
       return imageUrl;
     } catch (error) {
       throw error;

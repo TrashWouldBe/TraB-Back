@@ -1,18 +1,7 @@
-import {
-  Controller,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import {
-  ApiBody,
-  ApiConsumes,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Image')
 @Controller('image')
@@ -44,9 +33,7 @@ export class ImageController {
     status: 500,
     description: '실패: 이미지 저장 오류',
   })
-  async uploadImage(
-    @UploadedFile() image: Express.Multer.File,
-  ): Promise<string> {
+  async uploadImage(@UploadedFile() image: Express.Multer.File): Promise<string> {
     return this.imageService.uploadImage(image, 'test', null);
   }
 }

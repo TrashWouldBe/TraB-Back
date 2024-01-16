@@ -134,6 +134,7 @@ export class UserService {
           '디비 저장과정에서 오류가 발생했습니다.',
         );
       }
+
       return imageUrl;
     } catch (error) {
       throw error;

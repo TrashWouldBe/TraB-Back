@@ -22,7 +22,7 @@ export class ImageController {
   @UseInterceptors(FileInterceptor('image'))
   @Post('/upload')
   @ApiOperation({
-    summary: 'imageUpload api',
+    summary: '이미지 업로드 테스트 api',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -38,7 +38,7 @@ export class ImageController {
   })
   @ApiResponse({
     status: 201,
-    description: 'Image uploaded successfully',
+    description: '성공: 이미지가 업로드 되었습니다',
   })
   @ApiResponse({
     status: 400,
@@ -47,6 +47,6 @@ export class ImageController {
   async uploadImage(
     @UploadedFile() image: Express.Multer.File,
   ): Promise<string> {
-    return this.imageService.uploadImage(image);
+    return this.imageService.uploadImage(image, 'test', null);
   }
 }

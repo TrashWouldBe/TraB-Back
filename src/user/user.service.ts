@@ -8,12 +8,14 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserInfoDto } from './dto/user-info.dto';
 import * as jwt from 'jsonwebtoken';
+import { ImageService } from 'src/image/image.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly imageService: ImageService,
   ) {}
 
   async createUser(
@@ -30,6 +32,7 @@ export class UserService {
         uid,
         email,
         image,
+        deletedAt: null,
       };
 
       await this.userRepository.save(user);
@@ -38,12 +41,17 @@ export class UserService {
     }
   }
 
+  async decodeToken(idToken: string): Promise<string> {
+    const bearerIdToken: string = idToken.substring(7);
+    const decodedIdToken: any = jwt.decode(bearerIdToken);
+
+    const uid: string = decodedIdToken.uid;
+    return uid;
+  }
+
   async getUserInfo(idToken: string): Promise<UserInfoDto> {
     try {
-      const bearerIdToken: string = idToken.substring(7);
-      const decodedIdToken: any = jwt.decode(bearerIdToken);
-
-      const uid: string = decodedIdToken.uid;
+      const uid: string = await this.decodeToken(idToken);
 
       const user = await this.userRepository.find({
         select: {
@@ -65,6 +73,46 @@ export class UserService {
       };
 
       return ret;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteUser(idToken: string): Promise<void> {
+    try {
+      const uid: string = await this.decodeToken(idToken);
+
+      await this.userRepository
+        .createQueryBuilder()
+        .softDelete()
+        .where('uid = :uid', { uid: uid })
+        .execute();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async changeUserImage(
+    idToken: string,
+    image: Express.Multer.File,
+  ): Promise<string> {
+    try {
+      const uid: string = await this.decodeToken(idToken);
+
+      const imageUrl: string = await this.imageService.uploadImage(
+        image,
+        'profile',
+        uid,
+      );
+
+      await this.userRepository
+        .createQueryBuilder()
+        .update(User)
+        .set({ image: imageUrl })
+        .where('uid = :uid', { uid: uid })
+        .execute();
+
+      return imageUrl;
     } catch (error) {
       throw error;
     }

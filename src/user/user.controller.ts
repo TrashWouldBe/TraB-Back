@@ -1,7 +1,22 @@
-import { Controller, Get, Headers } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  Put,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserInfoDto } from './dto/user-info.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('User')
 @Controller('user')
@@ -29,5 +44,45 @@ export class UserController {
     @Headers('Authorization') idToken: string,
   ): Promise<UserInfoDto> {
     return this.userService.getUserInfo(idToken);
+  }
+
+  @Put('/delete')
+  @ApiOperation({
+    summary: '유저를 삭제하는 api',
+  })
+  async deleteUser(@Headers('Authorization') idToken: string): Promise<void> {
+    return this.userService.deleteUser(idToken);
+  }
+
+  @UseInterceptors(FileInterceptor('image'))
+  @Delete('/image')
+  @ApiOperation({
+    summary: '유저 이미지를 변경하는 api',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: '성공: 이미지 변경 완료',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '실패',
+  })
+  async updateUserImage(
+    @Headers('Authorization') idToken: string,
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<string> {
+    return this.userService.changeUserImage(idToken, image);
   }
 }

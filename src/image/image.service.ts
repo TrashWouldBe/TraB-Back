@@ -14,8 +14,23 @@ export class ImageService {
     this.bucket = this.storage.bucket('trab-image');
   }
 
-  async uploadImage(image: Express.Multer.File): Promise<string> {
-    await this.bucket.file('profile-image/image.png').save(image.buffer);
-    return `https://storage.googleapis.com/${this.bucket.name}/image.png`;
+  async uploadImage(
+    image: Express.Multer.File,
+    type: string,
+    param: string | null,
+  ): Promise<string> {
+    try {
+      if (type === 'test') {
+        await this.bucket.file('profile-image/image.png').save(image.buffer);
+        return `https://storage.googleapis.com/${this.bucket.name}/image.png`;
+      } else if (type === 'profile') {
+        await this.bucket
+          .file(`profile-image/${param}/${param}.png`)
+          .save(image.buffer);
+        return `https://storage.googleapis.com/${this.bucket.name}/${param}.png`;
+      }
+    } catch (error) {
+      throw error;
+    }
   }
 }

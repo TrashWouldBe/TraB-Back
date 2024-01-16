@@ -41,12 +41,8 @@ export class AuthController {
     status: authErrorCode.FAIL_GET_KAKAO_LOGIN_INFO,
     type: FailGetKakaoLoginInfoResponse,
   })
-  async socialSignInWithKakao(
-    @Body() socialSignInWithKakaoDTO: SocialSignInWithKakaoDTO,
-  ): Promise<SerializedMessage> {
-    const data: UserToken = await this.authService.socialSignInWithKakao(
-      socialSignInWithKakaoDTO,
-    );
+  async socialSignInWithKakao(@Body() socialSignInWithKakaoDTO: SocialSignInWithKakaoDTO): Promise<SerializedMessage> {
+    const data: UserToken = await this.authService.socialSignInWithKakao(socialSignInWithKakaoDTO);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -70,9 +66,7 @@ export class AuthController {
   async socialSignInWithGoogle(
     @Body() socialSignInWithGoogleDTO: SocialSignInWithGoogleDTO,
   ): Promise<SerializedMessage> {
-    const data: UserToken = await this.authService.socialSignInWithGoogle(
-      socialSignInWithGoogleDTO,
-    );
+    const data: UserToken = await this.authService.socialSignInWithGoogle(socialSignInWithGoogleDTO);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -97,12 +91,8 @@ export class AuthController {
     status: authErrorCode.FAIL_LOGIN_FIREBASE,
     type: FailLoginFirebaseResponse,
   })
-  async socialSignInWithApple(
-    @Body() socialSignInWithAppleDTO: SocialSignInWithAppleDTO,
-  ): Promise<SerializedMessage> {
-    const data: UserToken = await this.authService.socialSignInWithApple(
-      socialSignInWithAppleDTO,
-    );
+  async socialSignInWithApple(@Body() socialSignInWithAppleDTO: SocialSignInWithAppleDTO): Promise<SerializedMessage> {
+    const data: UserToken = await this.authService.socialSignInWithApple(socialSignInWithAppleDTO);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

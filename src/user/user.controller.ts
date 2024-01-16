@@ -1,20 +1,5 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  Patch,
-  Req,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Controller, Delete, Get, Patch, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserInfoDto } from './dto/user-info.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -99,10 +84,7 @@ export class UserController {
     status: 500,
     description: '실패: 서버 자체 오류',
   })
-  async updateUserImage(
-    @Req() request: Request,
-    @UploadedFile() image: Express.Multer.File,
-  ): Promise<string> {
+  async updateUserImage(@Req() request: Request, @UploadedFile() image: Express.Multer.File): Promise<string> {
     const token: string = request.headers['authorization'];
     return this.userService.changeUserImage(token, image);
   }

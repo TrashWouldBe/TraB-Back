@@ -8,7 +8,15 @@ async function bootstrap() {
     .setTitle('TrashWouldBe')
     .setDescription('TraB API description')
     .setVersion('1.0')
-    .addTag('Auth')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        name: 'JWT',
+        in: 'header',
+      },
+      'id_token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

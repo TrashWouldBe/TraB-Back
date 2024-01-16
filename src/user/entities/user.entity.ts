@@ -8,7 +8,7 @@ export class User {
   @Column({ type: 'varchar' })
   email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   image: string;
 
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })

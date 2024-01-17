@@ -79,6 +79,29 @@ export class UserService {
     }
   }
 
+  async getUserImage(idToken: string): Promise<string> {
+    try {
+      const uid: string = await this.decodeToken(idToken);
+
+      const user = await this.userRepository.find({
+        select: {
+          image: true,
+        },
+        where: {
+          uid: uid,
+        },
+      });
+
+      if (user.length === 0) {
+        throw new NotFoundException('유저를 찾을 수 없습니다.');
+      }
+
+      return user[0].image;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async deleteUser(idToken: string): Promise<void> {
     try {
       const uid: string = await this.decodeToken(idToken);

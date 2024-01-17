@@ -36,6 +36,38 @@ export class UserController {
     return this.userService.getUserInfo(token);
   }
 
+  @Get('/image')
+  @ApiBearerAuth('id_token')
+  @ApiOperation({
+    summary: '유저의 사진을 가져오는 api',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공: 유저 사진 반환',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공: 유저 사진 없음',
+    type: null,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '실패: 유저를 찾을 수 없음',
+  })
+  @ApiResponse({
+    status: 406,
+    description: '실패: 토큰오류',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 오류',
+  })
+  async getUserImage(@Req() request: Request): Promise<string> {
+    const token: string = request.headers['authorization'];
+    return this.userService.getUserImage(token);
+  }
+
   @Delete('/delete')
   @ApiBearerAuth('id_token')
   @ApiOperation({

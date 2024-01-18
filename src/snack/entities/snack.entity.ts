@@ -1,10 +1,11 @@
 import { Trab } from 'src/trab/entities/trab.entity';
-import { Column, DeleteDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { Column, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('snack')
 export class Snack {
   @PrimaryGeneratedColumn()
-  Key: number;
+  snack_id: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
   glass: number;

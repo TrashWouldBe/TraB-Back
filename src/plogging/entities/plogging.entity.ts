@@ -1,4 +1,4 @@
-import { Trab } from 'src/trab/entities/trab.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('plogging')
@@ -18,10 +18,16 @@ export class Plogging {
   @Column({ type: 'time', nullable: false })
   run_time: Date;
 
+  @Column({ type: 'int', nullable: false })
+  trab_snack: number;
+
+  @Column({ type: 'int', nullable: false })
+  calorie: number;
+
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 
-  @ManyToOne(() => Trab, (trab) => trab.trab_id)
-  @JoinColumn({ name: 'trab_id' })
-  trab: Trab;
+  @ManyToOne(() => User, (user) => user.uid)
+  @JoinColumn({ name: 'uid' })
+  user: User;
 }

@@ -1,5 +1,4 @@
 import { Column, DeleteDateColumn, Entity, PrimaryColumn } from 'typeorm';
-import { Inquire } from './inquire.entity';
 
 @Entity('user')
 export class User {

@@ -20,5 +20,5 @@ export class Furniture {
 
   @ManyToOne(() => Trab, (trab) => trab.trab_id)
   @JoinColumn({ name: 'trab_id' })
-  trab_id: number;
+  trab: Trab;
 }

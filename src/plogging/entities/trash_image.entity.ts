@@ -17,7 +17,7 @@ export class Trash_image {
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 
-  @ManyToOne(() => Snack, (snack) => snack.trab_id)
-  @JoinColumn({ name: 'trab_id' })
-  trab_id: Trab;
+  @ManyToOne(() => Snack, (snack) => snack.snack_id)
+  @JoinColumn({ name: 'snack_id' })
+  snack_id: Trab;
 }

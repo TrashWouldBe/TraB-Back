@@ -1,10 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Inquire } from './inquire.entity';
 
 @Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  uid: number;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: false })
   email: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  image_url: string;
 }

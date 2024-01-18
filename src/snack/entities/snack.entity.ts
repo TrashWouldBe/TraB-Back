@@ -1,5 +1,6 @@
 import { Trab } from 'src/trab/entities/trab.entity';
-import { Column, DeleteDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('snack')
 export class Snack {
@@ -30,10 +31,11 @@ export class Snack {
   @Column({ type: 'int', nullable: false, default: 0 })
   food_waste: number;
 
-  @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
-  deletedAt: Date | null;
+  @OneToOne(() => User)
+  @JoinColumn()
+  user: User;
 
   @OneToOne(() => Trab, (trab) => trab.trab_id)
   @JoinColumn({ name: 'trab_id' })
-  trab: Trab;
+  trab_id: Trab;
 }

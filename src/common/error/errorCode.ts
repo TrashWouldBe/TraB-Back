@@ -5,3 +5,7 @@ export const authErrorCode = {
   FAIL_DECODE_ID_TOKEN: 1003,
   FAIL_GET_GOOGLE_LOGIN_INFO: 1004,
 };
+
+export const userErrorCode = {
+  FAIL_DELETE_USER_IN_FIREBASE: 1005,
+};

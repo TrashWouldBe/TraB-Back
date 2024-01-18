@@ -10,7 +10,7 @@ import { Trab } from './trab.entity';
 @Entity('furniture')
 export class Furniture {
   @PrimaryGeneratedColumn()
-  key: number;
+  furniture_id: number;
 
   @Column({ type: 'varchar', nullable: false })
   name: string;

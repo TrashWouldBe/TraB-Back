@@ -12,7 +12,7 @@ import { Trab } from 'src/trab/entities/trab.entity';
 @Entity('trash_image')
 export class Trash_image {
   @PrimaryGeneratedColumn()
-  key: number;
+  image_id: number;
 
   @Column({ type: 'varchar', nullable: false })
   trash_tag: string;

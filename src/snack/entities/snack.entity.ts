@@ -11,7 +11,7 @@ import {
 @Entity('snack')
 export class Snack {
   @PrimaryGeneratedColumn()
-  Key: number;
+  snack_id: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
   glass: number;

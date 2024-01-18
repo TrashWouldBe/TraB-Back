@@ -1,9 +1,9 @@
-import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, PrimaryColumn } from 'typeorm';
 import { Inquire } from './inquire.entity';
 
 @Entity('user')
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn({ type: 'varchar' })
   uid: string;
 
   @Column({ type: 'varchar', nullable: false })

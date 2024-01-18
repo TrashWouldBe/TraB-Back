@@ -29,5 +29,5 @@ export class Plogging {
 
   @ManyToOne(() => User, (user) => user.uid)
   @JoinColumn({ name: 'uid' })
-  uid: User;
+  user: User;
 }

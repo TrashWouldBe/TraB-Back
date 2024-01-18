@@ -21,6 +21,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Generate Environment File
+        run: |
+          echo "FIREBASE_KEY=$FIREBASE_KEY" >> .env
+          echo "CLOUD_STORAGE_KEY=$CLOUD_STORAGE_KEY" >> .env
+          echo "DB_TYPE=$DB_TYPE" >> .env
+          echo "DB_HOST=$DB_HOST" >> .env
+          echo "DB_PORT=$DB_PORT" >> .env
+          echo "DB_USERNAME=$DB_USERNAME" >> .env
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+          echo "DB_DATABASE=$DB_DATABASE" >> .env
+        env:
+          FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
+          CLOUD_STORAGE_KEY: ${{ secrets.CLOUD_STORAGE_KEY }}
+          DB_TYPE: ${{ secrets.DB_TYPE }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:

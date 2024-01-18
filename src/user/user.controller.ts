@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags
 import { UserService } from './user.service';
 import { UserInfoDto } from './dto/user-info.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { userErrorCode } from 'src/common/error/errorCode';
 
 @ApiTags('User')
 @Controller('user')
@@ -43,8 +44,7 @@ export class UserController {
   })
   @ApiResponse({
     status: 200,
-    description: '성공: 유저 사진 반환',
-    type: String,
+    description: '성공: 유저 사진 url 반환',
   })
   @ApiResponse({
     status: 200,
@@ -78,6 +78,14 @@ export class UserController {
     description: '성공: 유저 삭제 성공',
   })
   @ApiResponse({
+    status: 406,
+    description: '실패: db에서 유저 지우는 과정에서 오류',
+  })
+  @ApiResponse({
+    status: userErrorCode.FAIL_DELETE_USER_IN_FIREBASE,
+    description: '실패: firebase에서 유저 지우는 과정에서 오류',
+  })
+  @ApiResponse({
     status: 500,
     description: '실패: 서버 자체 오류',
   })
@@ -106,7 +114,7 @@ export class UserController {
   })
   @ApiResponse({
     status: 201,
-    description: '성공: 이미지 변경 완료',
+    description: '성공: 사진 url 반환',
   })
   @ApiResponse({
     status: 406,

@@ -15,7 +15,9 @@ export class Trab {
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 
-  @OneToOne(() => User, (user) => user.uid)
+  @OneToOne(() => User, (user) => user.uid, {
+    cascade: ['soft-remove'],
+  })
   @JoinColumn({ name: 'uid' })
   user: User;
 }

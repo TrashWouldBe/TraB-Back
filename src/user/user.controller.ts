@@ -10,7 +10,7 @@ import { userErrorCode } from 'src/common/error/errorCode';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/info')
+  @Get()
   @ApiBearerAuth('id_token')
   @ApiOperation({
     summary: '유저 정보를 가져오는 api',
@@ -68,7 +68,7 @@ export class UserController {
     return this.userService.getUserImage(token);
   }
 
-  @Delete('/delete')
+  @Delete()
   @ApiBearerAuth('id_token')
   @ApiOperation({
     summary: '유저를 삭제하는 api',

@@ -10,7 +10,7 @@ export class SnackService {
     private readonly snackRepository: Repository<Snack>,
   ) {}
 
-  async earnSnack(uid: string, trashType: string): Promise<void> {
+  async getSnackByUid(uid: string): Promise<Snack> {
     try {
       const snack = await this.snackRepository.find({
         relations: {
@@ -31,7 +31,15 @@ export class SnackService {
         throw new NotFoundException('snack entity를 찾는 과정에서 오류가 발생했습니다.');
       }
 
-      const userSnack: Snack = snack[0];
+      return snack[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async earnSnack(uid: string, trashType: string): Promise<void> {
+    try {
+      const userSnack: Snack = await this.getSnackByUid(uid);
 
       if (userSnack[trashType] !== undefined) {
         userSnack[trashType] = (userSnack[trashType] as number) + 1;

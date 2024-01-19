@@ -18,7 +18,7 @@ export class Plogging {
   @Column({ type: 'time', nullable: false })
   run_time: Date;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   trab_snack: number;
 
   @Column({ type: 'int', nullable: false })
@@ -27,7 +27,9 @@ export class Plogging {
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 
-  @ManyToOne(() => User, (user) => user.uid)
+  @ManyToOne(() => User, (user) => user.uid, {
+    cascade: ['soft-remove'],
+  })
   @JoinColumn({ name: 'uid' })
   user: User;
 }

@@ -1,7 +1,7 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { Plogging } from 'src/plogging/entities/plogging.entity';
-import { Trash_image } from 'src/plogging/entities/trash_image.entity';
+import { Trash_image } from 'src/image/entities/trash_image.entity';
 import { Snack } from 'src/snack/entities/snack.entity';
 import { Furniture } from 'src/trab/entities/furniture.entity';
 import { Trab } from 'src/trab/entities/trab.entity';
@@ -20,7 +20,7 @@ export const typeOrmConfig: TypeOrmModuleAsyncOptions = {
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_DATABASE'),
       entities: [User, Trab, Snack, Plogging, Furniture, Trash_image, Inquire],
-      synchronize: true,
+      synchronize: false,
     };
     return option;
   },

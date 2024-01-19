@@ -12,7 +12,9 @@ export class Inquire {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @ManyToOne(() => User, (user) => user.uid)
+  @ManyToOne(() => User, (user) => user.uid, {
+    cascade: ['soft-remove'],
+  })
   @JoinColumn({ name: 'uid' })
   user: User;
 }

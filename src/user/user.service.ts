@@ -3,11 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserInfoDto } from './dto/user-info.dto';
-import * as jwt from 'jsonwebtoken';
 import { ImageService } from 'src/image/image.service';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { HttpServerError } from 'src/common/error/errorHandler';
 import { userErrorCode } from 'src/common/error/errorCode';
+import { decodeToken } from 'src/common/utils/decode-idtoken';
 
 @Injectable()
 export class UserService {
@@ -37,26 +37,9 @@ export class UserService {
     }
   }
 
-  async decodeToken(idToken: string): Promise<string> {
-    try {
-      const bearerIdToken: string = idToken.substring(7);
-      const decodedIdToken: any = jwt.decode(bearerIdToken);
-
-      const uid: string = decodedIdToken.user_id;
-
-      if (!uid) {
-        throw new NotAcceptableException('Token에서 uid를 발견하지 못했습니다.');
-      }
-
-      return uid;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   async getUserInfo(idToken: string): Promise<UserInfoDto> {
     try {
-      const uid: string = await this.decodeToken(idToken);
+      const uid: string = await decodeToken(idToken);
 
       const user = await this.userRepository.find({
         select: {
@@ -85,7 +68,7 @@ export class UserService {
 
   async getUserImage(idToken: string): Promise<string> {
     try {
-      const uid: string = await this.decodeToken(idToken);
+      const uid: string = await decodeToken(idToken);
 
       const user = await this.userRepository.find({
         select: {
@@ -108,7 +91,7 @@ export class UserService {
 
   async deleteUser(idToken: string): Promise<void> {
     try {
-      const uid: string = await this.decodeToken(idToken);
+      const uid: string = await decodeToken(idToken);
 
       const auth = this.firebaseService.getAuth();
 
@@ -138,9 +121,9 @@ export class UserService {
 
   async changeUserImage(idToken: string, image: Express.Multer.File): Promise<string> {
     try {
-      const uid: string = await this.decodeToken(idToken);
+      const uid: string = await decodeToken(idToken);
 
-      const imageUrl: string = await this.imageService.uploadImage(image, 'profile', uid);
+      const imageUrl: string = await this.imageService.uploadProfileImage(image, uid);
 
       const result = await this.userRepository
         .createQueryBuilder()

@@ -4,6 +4,9 @@ import { UserService } from './user.service';
 import { UserInfoDto } from './dto/user-info.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { userErrorCode } from 'src/common/error/errorCode';
+import { serializeMessage } from 'src/common/utils/serialize-message';
+import { SUCCESS_CODE } from 'src/common/constants/constants';
+import { SerializedMessage } from 'src/common/types/serialized-message.type';
 
 @ApiTags('User')
 @Controller('user')
@@ -32,9 +35,14 @@ export class UserController {
     status: 500,
     description: '실패: 서버 자체 오류',
   })
-  async getUserInfo(@Req() request: Request): Promise<UserInfoDto> {
+  async getUserInfo(@Req() request: Request): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    return this.userService.getUserInfo(token);
+    const data: UserInfoDto = await this.userService.getUserInfo(token);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
   }
 
   @Get('/image')
@@ -63,9 +71,14 @@ export class UserController {
     status: 500,
     description: '실패: 서버 자체 오류',
   })
-  async getUserImage(@Req() request: Request): Promise<string> {
+  async getUserImage(@Req() request: Request): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    return this.userService.getUserImage(token);
+    const data: string = await this.userService.getUserImage(token);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
   }
 
   @Delete()
@@ -89,9 +102,13 @@ export class UserController {
     status: 500,
     description: '실패: 서버 자체 오류',
   })
-  async deleteUser(@Req() request: Request): Promise<void> {
+  async deleteUser(@Req() request: Request): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    return this.userService.deleteUser(token);
+    await this.userService.deleteUser(token);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+    });
   }
 
   @UseInterceptors(FileInterceptor('image'))
@@ -124,8 +141,16 @@ export class UserController {
     status: 500,
     description: '실패: 서버 자체 오류',
   })
-  async updateUserImage(@Req() request: Request, @UploadedFile() image: Express.Multer.File): Promise<string> {
+  async updateUserImage(
+    @Req() request: Request,
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    return this.userService.changeUserImage(token, image);
+    const data: string = await this.userService.changeUserImage(token, image);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
   }
 }

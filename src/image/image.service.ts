@@ -89,12 +89,9 @@ export class ImageService {
     }
   }
 
-  async uploadPloggingTrashImages(
-    uid: string,
-    ploggingId: number,
-    images: Array<Express.Multer.File>,
-  ): Promise<string> {
+  async uploadPloggingTrashImages(uid: string, ploggingId: number, images: Array<Express.Multer.File>): Promise<void> {
     try {
+      // 쓰레기 종류를 저장했다가 한번만 db 접근을 하기 위함
       const trashMap = new Map([
         ['glass', 0],
         ['paper', 0],
@@ -106,6 +103,9 @@ export class ImageService {
         ['food_waste', 0],
       ]);
 
+      const dataArray: any[] = [];
+
+      // 사진에 고유 이름을 붙이기 위함
       let imageIdx = 1;
 
       // 이미지 이름을 고유하게 만들기 위해 한국 시각을 이용
@@ -113,7 +113,8 @@ export class ImageService {
       const koreaTimeDiff = now.getTimezoneOffset() / 60;
       const koreaNow = new Date(now.getTime() - koreaTimeDiff * 60 * 60 * 1000);
 
-      let imageUrl;
+      // snack db table 찾아오기
+      const snack: Snack = await this.snackService.getSnackByUid(uid);
 
       images.forEach((image) => {
         /* Todo: 각 이미지를 모델에 던져서 trash type을 알아옴  */
@@ -122,47 +123,44 @@ export class ImageService {
         trashMap.set(trashType, trashMap.get(trashType) + 1);
 
         // 이미지를 cloud storage에 저장
-        imageUrl = this.uploadImageToGCS(
+        const imageUrl = this.uploadImageToGCS(
           image,
           `${uid}/plogging_trash_image/plogging_${ploggingId}/${koreaNow}_${imageIdx}.png`,
         );
+
+        dataArray.push({
+          snack: Snack,
+          image: imageUrl,
+          trash_tag: trashType,
+          date: koreaNow,
+        });
 
         imageIdx++;
       });
       // 주은 쓰레기의 종류를 확인하고 간식에 추가
       await this.snackService.earnSnack(uid, trashType);
 
-      // cloud storage에 저장한 url을 db에 저장
-      const snack: Snack = await this.snackService.getSnackByUid(uid);
-
+      // cloud storage에 저장한 url을 db에 저장 - 한번에 하기 위해서 bulk insert 이용
       const imageRow = await this.trashImageRepository
         .createQueryBuilder()
         .insert()
         .into(Trash_image)
-        .values([
-          {
-            snack: snack,
-            image: imageUrl,
-            trash_tag: trashType,
-            date: koreaNow,
-          },
-        ])
+        .values(dataArray)
         .execute();
 
       const ploggingRow: Plogging = await this.ploggingService.getPloggingByUserIdAndPloggingId(uid, ploggingId);
+
+      const ploggingImageRelations = imageRow.generatedMaps.map((image) => ({
+        trash_image: image,
+        plogging: ploggingRow,
+      }));
 
       await this.ploggingImageRelationRepository
         .createQueryBuilder()
         .insert()
         .into(Plogging_image_relation)
-        .values([
-          {
-            trash_image: imageRow[0],
-            plogging: ploggingRow,
-          },
-        ]);
-
-      return imageUrl;
+        .values(ploggingImageRelations)
+        .execute();
     } catch (error) {
       throw error;
     }

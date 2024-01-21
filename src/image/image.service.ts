@@ -31,12 +31,22 @@ export class ImageService {
     this.bucket = this.storage.bucket('trab-image');
   }
 
-  async uploadProfileImage(image: Express.Multer.File, uid: string): Promise<string> {
+  async uploadImageToGCS(image: Express.Multer.File, imagePath: string): Promise<string> {
     try {
-      await this.bucket.file(`${uid}/profile-image/profile.png`).save(image.buffer);
-      return `https://storage.googleapis.com/${this.bucket.name}/${uid}/profile-image/profile.png`;
+      await this.bucket.file(imagePath).save(image.buffer);
+      return `https://storage.googleapis.com/${this.bucket.name}/${imagePath}`;
     } catch (error) {
       throw new InternalServerErrorException('이미지를 저장하는 과정에서 오류가 발생했습니다.');
+    }
+  }
+
+  // async uploadTrsahImageToDB(snack: Snack, imageUrl: string, trashType: string): Promise<void>
+
+  async uploadProfileImage(image: Express.Multer.File, uid: string): Promise<string> {
+    try {
+      return await this.uploadImageToGCS(image, `${uid}/profile-image/profile.png`);
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -54,11 +64,10 @@ export class ImageService {
       const koreaNow = new Date(now.getTime() - koreaTimeDiff * 60 * 60 * 1000);
 
       // 이미지를 cloud storage에 저장
-      await this.bucket.file(`${uid}/normal_trash_image/${koreaNow}.png`).save(image.buffer);
+      const imageUrl: string = await this.uploadImageToGCS(image, `${uid}/normal_trash_image/${koreaNow}.png`);
 
       // cloud storage에 저장한 url을 db에 저장
       const snack: Snack = await this.snackService.getSnackByUid(uid);
-      const imageUrl = `https://storage.googleapis.com/${this.bucket.name}/${uid}/normal_trash_image/${koreaNow}.png`;
 
       await this.trashImageRepository
         .createQueryBuilder()
@@ -80,30 +89,51 @@ export class ImageService {
     }
   }
 
-  async uploadPloggingTrashImage(
-    idToken: string,
-    trashType: string,
+  async uploadPloggingTrashImages(
+    uid: string,
     ploggingId: number,
-    image: Express.Multer.File,
+    images: Array<Express.Multer.File>,
   ): Promise<string> {
     try {
-      // const uid: string = await decodeToken(idToken);
-      const uid: string = idToken;
+      const trashMap = new Map([
+        ['glass', 0],
+        ['paper', 0],
+        ['can', 0],
+        ['plastic', 0],
+        ['vinyl', 0],
+        ['styrofoam', 0],
+        ['general_waste', 0],
+        ['food_waste', 0],
+      ]);
 
-      // 주은 쓰레기의 종류를 확인하고 간식에 추가
-      await this.snackService.earnSnack(uid, trashType);
+      let imageIdx = 1;
 
       // 이미지 이름을 고유하게 만들기 위해 한국 시각을 이용
       const now = new Date();
       const koreaTimeDiff = now.getTimezoneOffset() / 60;
       const koreaNow = new Date(now.getTime() - koreaTimeDiff * 60 * 60 * 1000);
 
-      // 이미지를 cloud storage에 저장
-      await this.bucket.file(`${uid}/plogging_trash_image/${ploggingId}/${koreaNow}.png`).save(image.buffer);
+      let imageUrl;
+
+      images.forEach((image) => {
+        /* Todo: 각 이미지를 모델에 던져서 trash type을 알아옴  */
+        const trashType = 'glass';
+
+        trashMap.set(trashType, trashMap.get(trashType) + 1);
+
+        // 이미지를 cloud storage에 저장
+        imageUrl = this.uploadImageToGCS(
+          image,
+          `${uid}/plogging_trash_image/plogging_${ploggingId}/${koreaNow}_${imageIdx}.png`,
+        );
+
+        imageIdx++;
+      });
+      // 주은 쓰레기의 종류를 확인하고 간식에 추가
+      await this.snackService.earnSnack(uid, trashType);
 
       // cloud storage에 저장한 url을 db에 저장
       const snack: Snack = await this.snackService.getSnackByUid(uid);
-      const imageUrl = `https://storage.googleapis.com/${this.bucket.name}/${uid}/plogging_trash_image/${ploggingId}/${koreaNow}.png`;
 
       const imageRow = await this.trashImageRepository
         .createQueryBuilder()

@@ -7,7 +7,7 @@ export class UserInfoDto {
   user_email: string;
 
   @ApiProperty({
-    example: 'https://storage.googleapis.com/trab-image/user-uid/image.png',
+    example: 'https://storage.googleapis.com/trab-image/user-uid/imag.png',
   })
   user_image: string | null;
 }

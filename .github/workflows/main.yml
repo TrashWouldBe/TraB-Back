@@ -80,6 +80,14 @@ jobs:
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
 
+      # 이미지 삭제
+      - name: Delete old Docker images on GCP Artifact Registry
+        run: |
+          OLD_TAG="${{ steps.meta.outputs.tags }}"
+          if [ -n "$OLD_TAG" ]; then
+            gcloud container images delete "$OLD_TAG" --quiet --force-delete-tags
+          fi
+
       # Deploy to Google Compute Engine instance
       - name: Deploy
         run: |

@@ -34,7 +34,10 @@ export class ImageService {
   async uploadProfileImage(image: Express.Multer.File, uid: string): Promise<string> {
     try {
       await this.bucket.file(`${uid}/profile-image/profile.png`).save(image.buffer);
-      return `https://storage.googleapis.com/${this.bucket.name}/${uid}/profile-image/profile.png`;
+      // return `https://storage.googleapis.com/${this.bucket.name}/${uid}/profile-image/profile.png`;
+      return `https://storage.googleapis.com/${
+        this.bucket.name
+      }/${uid}/profile-image/profile.png?timestamp=${Date.now()}`;
     } catch (error) {
       throw new InternalServerErrorException('이미지를 저장하는 과정에서 오류가 발생했습니다.');
     }

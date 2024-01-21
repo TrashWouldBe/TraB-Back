@@ -37,7 +37,7 @@ export class SnackService {
     }
   }
 
-  async earnSnack(uid: string, trashType: string): Promise<void> {
+  async earnSnack(uid: string, trashType: string): Promise<Snack> {
     try {
       const userSnack: Snack = await this.getSnackByUid(uid);
 
@@ -48,8 +48,29 @@ export class SnackService {
       }
 
       await this.snackRepository.save(userSnack);
+
+      return userSnack;
     } catch (error) {
-      throw Error('여기서 오류 발생');
+      throw Error('간식 개수 저장과정에서 오류 발생');
+    }
+  }
+
+  async earnSnacks(uid: string, trashMap: Map<string, number>): Promise<void> {
+    try {
+      const userSnack: Snack = await this.getSnackByUid(uid);
+
+      userSnack['glass'] = (userSnack['glass'] as number) + trashMap.get('glass');
+      userSnack['paper'] = (userSnack['paper'] as number) + trashMap.get('paper');
+      userSnack['can'] = (userSnack['can'] as number) + trashMap.get('can');
+      userSnack['plastic'] = (userSnack['plastic'] as number) + trashMap.get('plastic');
+      userSnack['vinyl'] = (userSnack['vinyl'] as number) + trashMap.get('vinyl');
+      userSnack['styrofoam'] = (userSnack['styrofoam'] as number) + trashMap.get('styrofoam');
+      userSnack['general_waste'] = (userSnack['general_waste'] as number) + trashMap.get('general_waste');
+      userSnack['food_waste'] = (userSnack['food_waste'] as number) + trashMap.get('food_waste');
+
+      await this.snackRepository.save(userSnack);
+    } catch (error) {
+      throw Error('간식 개수 저장과정에서 오류 발생');
     }
   }
 }

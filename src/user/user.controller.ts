@@ -1,5 +1,5 @@
-import { Controller, Delete, Get, Patch, Query, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Delete, Get, Patch, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserInfoDto } from './dto/user-info.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -129,10 +129,6 @@ export class UserController {
       },
     },
   })
-  // @ApiQuery({
-  //   name: 'token',
-  //   type: 'string',
-  // })
   @ApiResponse({
     status: 201,
     description: '성공: 사진 url 반환',
@@ -147,7 +143,6 @@ export class UserController {
   })
   async updateUserImage(
     @Req() request: Request,
-    // @Query('token') token: string,
     @UploadedFile() image: Express.Multer.File,
   ): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];

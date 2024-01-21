@@ -14,7 +14,7 @@ export class SnackController {
   @Get()
   @ApiBearerAuth('id_token')
   @ApiOperation({
-    description: 'trab가 가지고 있는 간식 가져오는 api',
+    summary: 'trab가 가지고 있는 간식 가져오는 api',
   })
   @ApiResponse({
     status: 200,

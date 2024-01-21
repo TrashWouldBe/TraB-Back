@@ -50,8 +50,7 @@ export class ImageService {
 
   async uploadNormalTrashImage(idToken: string, image: Express.Multer.File): Promise<string> {
     try {
-      // const uid: string = await decodeToken(idToken);
-      const uid: string = idToken;
+      const uid: string = await decodeToken(idToken);
 
       /*Todo 모델로 쓰레기 정보 알아내기*/
       const trashType = 'glass';
@@ -113,7 +112,7 @@ export class ImageService {
       const koreaNow = new Date(now.getTime() - koreaTimeDiff * 60 * 60 * 1000);
 
       // snack db table 찾아오기
-      const snack: Snack = await this.snackService.getSnackByUid(uid);
+      const snack: Snack = await this.snackService.getSnackByUserId(uid);
 
       for (const image of images) {
         // Todo

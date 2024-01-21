@@ -50,8 +50,8 @@ export class ImageService {
 
   async uploadNormalTrashImage(idToken: string, image: Express.Multer.File): Promise<string> {
     try {
-      const uid: string = await decodeToken(idToken);
-      // const uid: string = idToken;
+      // const uid: string = await decodeToken(idToken);
+      const uid: string = idToken;
 
       /*Todo 모델로 쓰레기 정보 알아내기*/
       const trashType = 'glass';
@@ -115,27 +115,27 @@ export class ImageService {
       // snack db table 찾아오기
       const snack: Snack = await this.snackService.getSnackByUid(uid);
 
-      images.forEach((image) => {
-        /* Todo: 각 이미지를 모델에 던져서 trash type을 알아옴  */
-        const trashType = 'glass';
-
+      for (const image of images) {
+        // Todo
+        const trashType = 'plastic';
         trashMap.set(trashType, trashMap.get(trashType) + 1);
 
         // 이미지를 cloud storage에 저장
-        const imageUrl = this.uploadImageToGCS(
+        const imageUrl = await this.uploadImageToGCS(
           image,
           `${uid}/plogging_trash_image/plogging_${ploggingId}/${koreaNow}_${imageIdx}.png`,
         );
 
         dataArray.push({
-          snack: Snack,
+          snack: snack,
           image: imageUrl,
           trash_tag: trashType,
           date: koreaNow,
         });
 
         imageIdx++;
-      });
+      }
+
       // 주은 쓰레기의 종류를 확인하고 간식에 추가
       await this.snackService.earnSnacks(uid, trashMap);
 

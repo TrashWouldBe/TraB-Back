@@ -27,7 +27,7 @@ export class UserService {
       });
 
       if (users.length !== 1) {
-        throw new NotFoundException('해당 플로깅을 찾을 수 업습니다.');
+        throw new NotFoundException('해당 유저를 찾을 수 없습니다.');
       }
 
       return users[0];

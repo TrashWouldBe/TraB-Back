@@ -1,7 +1,7 @@
-import { Controller, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Query, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { serializeMessage } from 'src/common/utils/serialize-message';
 import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
@@ -13,7 +13,7 @@ export class ImageController {
 
   @UseInterceptors(FileInterceptor('image'))
   @Post()
-  @ApiBearerAuth('id_token')
+  // @ApiBearerAuth('id_token')
   @ApiOperation({
     summary: '[미완]쓰레기 사진을 저장하는 api',
   })
@@ -28,6 +28,10 @@ export class ImageController {
         },
       },
     },
+  })
+  @ApiQuery({
+    name: 'token',
+    type: String,
   })
   @ApiResponse({
     status: 201,
@@ -44,8 +48,9 @@ export class ImageController {
   async uploadNormalTrashImage(
     @Req() request: Request,
     @UploadedFile() image: Express.Multer.File,
+    @Query('token') token: string,
   ): Promise<SerializedMessage> {
-    const token: string = request.headers['authorization'];
+    // const token: string = request.headers['authorization'];
     const data: string = await this.imageService.uploadNormalTrashImage(token, image);
     return serializeMessage({
       code: SUCCESS_CODE,

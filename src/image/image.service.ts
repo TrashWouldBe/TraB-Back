@@ -48,12 +48,13 @@ export class ImageService {
     }
   }
 
-  async uploadNormalTrashImage(idToken: string, trashType: string, image: Express.Multer.File): Promise<string> {
+  async uploadNormalTrashImage(idToken: string, image: Express.Multer.File): Promise<string> {
     try {
       const uid: string = await decodeToken(idToken);
       // const uid: string = idToken;
 
       /*Todo 모델로 쓰레기 정보 알아내기*/
+      const trashType = 'glass';
 
       // 이미지 이름을 고유하게 만들기 위해 한국 시각을 이용
       const now = new Date();

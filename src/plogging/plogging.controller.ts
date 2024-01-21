@@ -1,10 +1,14 @@
 import { Body, Controller, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PloggingService } from './plogging.service';
 import { PloggingInfoDto } from './dto/plogging-info.dto';
 import { User } from 'src/user/entities/user.entity';
+import { serializeMessage } from 'src/common/utils/serialize-message';
+import { SUCCESS_CODE } from 'src/common/constants/constants';
+import { SerializedMessage } from 'src/common/types/serialized-message.type';
 
+@ApiTags('Plogging')
 @Controller('plogging')
 export class PloggingController {
   constructor(private readonly ploggingService: PloggingService) {}
@@ -13,7 +17,7 @@ export class PloggingController {
   @Post()
   @ApiBearerAuth('id_token')
   @ApiOperation({
-    summary: '플로깅 정보를 저장하는 api',
+    summary: '[미완]플로깅 정보를 저장하는 api',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -55,8 +59,13 @@ export class PloggingController {
     @Req() request: Request,
     @UploadedFile() images: Array<Express.Multer.File>,
     @Body('ploggingInfo') ploggingInfo: PloggingInfoDto,
-  ): Promise<User> {
+  ): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    return this.ploggingService.uploadPlogging(token, images, ploggingInfo);
+    const data: User = await this.ploggingService.uploadPlogging(token, images, ploggingInfo);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
   }
 }

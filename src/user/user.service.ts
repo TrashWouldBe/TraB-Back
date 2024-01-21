@@ -18,6 +18,24 @@ export class UserService {
     private readonly imageService: ImageService,
   ) {}
 
+  async getUserByUserId(uid: string) {
+    try {
+      const users: User[] = await this.userRepository.find({
+        where: {
+          uid: uid,
+        },
+      });
+
+      if (users.length !== 1) {
+        throw new NotFoundException('해당 플로깅을 찾을 수 업습니다.');
+      }
+
+      return users[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async createUser(uid: string, email: string, image: string | null): Promise<void> {
     try {
       if (!email) {

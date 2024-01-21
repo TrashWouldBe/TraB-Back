@@ -7,7 +7,7 @@ import { UserModule } from 'src/user/user.module';
 import { ImageModule } from 'src/image/image.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Plogging]), forwardRef(() => ImageModule), UserModule],
+  imports: [TypeOrmModule.forFeature([Plogging]), forwardRef(() => ImageModule), forwardRef(() => UserModule)],
   controllers: [PloggingController],
   providers: [PloggingService],
   exports: [PloggingService],

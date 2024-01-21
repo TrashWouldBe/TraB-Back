@@ -6,6 +6,7 @@ import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { TrabInfoDto } from './dto/trab-info.dto';
+import { SnackService } from 'src/snack/snack.service';
 
 @Injectable()
 export class TrabService {
@@ -13,7 +14,24 @@ export class TrabService {
     @InjectRepository(Trab)
     private readonly trabRepository: Repository<Trab>,
     private readonly userService: UserService,
+    private readonly snackService: SnackService,
   ) {}
+
+  async getTrabByUserId(uid: string): Promise<Trab> {
+    try {
+      const user: User = await this.userService.getUserByUserId(uid);
+
+      const trabs: Trab[] = await this.trabRepository.find({
+        where: {
+          user: user,
+        },
+      });
+
+      return trabs[0];
+    } catch (error) {
+      throw error;
+    }
+  }
 
   async getTrab(idToken: string): Promise<TrabInfoDto | null> {
     try {
@@ -58,6 +76,9 @@ export class TrabService {
           },
         ])
         .execute();
+
+      const nowTrab: Trab = await this.getTrabByUserId(uid);
+      await this.snackService.createSnack(nowTrab);
 
       const ret: TrabInfoDto = {
         trab_name: name,

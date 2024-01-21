@@ -55,8 +55,7 @@ export class ImageService {
       const uid: string = await decodeToken(idToken);
       // const uid: string = idToken;
 
-      // 주은 쓰레기의 종류를 확인하고 간식에 추가
-      await this.snackService.earnSnack(uid, trashType);
+      /*Todo 모델로 쓰레기 정보 알아내기*/
 
       // 이미지 이름을 고유하게 만들기 위해 한국 시각을 이용
       const now = new Date();
@@ -66,9 +65,10 @@ export class ImageService {
       // 이미지를 cloud storage에 저장
       const imageUrl: string = await this.uploadImageToGCS(image, `${uid}/normal_trash_image/${koreaNow}.png`);
 
-      // cloud storage에 저장한 url을 db에 저장
-      const snack: Snack = await this.snackService.getSnackByUid(uid);
+      // 주은 쓰레기의 종류를 확인하고 간식에 추가
+      const snack: Snack = await this.snackService.earnSnack(uid, trashType);
 
+      // cloud storage에 저장한 url을 db에 저장
       await this.trashImageRepository
         .createQueryBuilder()
         .insert()
@@ -138,7 +138,7 @@ export class ImageService {
         imageIdx++;
       });
       // 주은 쓰레기의 종류를 확인하고 간식에 추가
-      await this.snackService.earnSnack(uid, trashType);
+      await this.snackService.earnSnacks(uid, trashMap);
 
       // cloud storage에 저장한 url을 db에 저장 - 한번에 하기 위해서 bulk insert 이용
       const imageRow = await this.trashImageRepository

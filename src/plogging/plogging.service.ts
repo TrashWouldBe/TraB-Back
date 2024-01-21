@@ -7,6 +7,7 @@ import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { ImageService } from 'src/image/image.service';
+import { FilesUploadDto } from './dto/plogging-upload.dto';
 
 @Injectable()
 export class PloggingService {
@@ -46,7 +47,7 @@ export class PloggingService {
   async uploadPlogging(
     idToken: string,
     images: Array<Express.Multer.File>,
-    ploggingInfo: PloggingInfoDto,
+    ploggingInfoDto: PloggingInfoDto,
   ): Promise<User> {
     try {
       const uid: string = await decodeToken(idToken);
@@ -61,10 +62,10 @@ export class PloggingService {
         .values([
           {
             user: user,
-            run_date: ploggingInfo.runDate,
-            run_name: ploggingInfo.runName,
-            run_range: ploggingInfo.runRange,
-            run_time: ploggingInfo.runTime,
+            run_date: ploggingInfoDto.runDate,
+            run_name: ploggingInfoDto.runName,
+            run_range: ploggingInfoDto.runRange,
+            run_time: ploggingInfoDto.runTime,
             trab_snack: trabSnack,
             calorie: 0, // 아직 칼로리 처리는 안함
           },

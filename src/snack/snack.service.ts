@@ -2,6 +2,8 @@ import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/c
 import { InjectRepository } from '@nestjs/typeorm';
 import { Snack } from './entities/snack.entity';
 import { Repository } from 'typeorm';
+import { SnackDto } from './dto/snack.dto';
+import { decodeToken } from 'src/common/utils/decode-idtoken';
 
 @Injectable()
 export class SnackService {
@@ -32,6 +34,29 @@ export class SnackService {
       }
 
       return snack[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getSnack(idToken: string): Promise<SnackDto> {
+    try {
+      const uid: string = await decodeToken(idToken);
+
+      const userSnack = await this.getSnackByUid(uid);
+
+      const ret: SnackDto = {
+        glass: userSnack.glass,
+        paper: userSnack.paper,
+        can: userSnack.can,
+        plastic: userSnack.plastic,
+        vinyl: userSnack.vinyl,
+        styrofoam: userSnack.styrofoam,
+        general_waste: userSnack.general_waste,
+        food_waste: userSnack.food_waste,
+      };
+
+      return ret;
     } catch (error) {
       throw error;
     }

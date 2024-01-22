@@ -4,6 +4,7 @@ import { Snack } from './entities/snack.entity';
 import { Repository } from 'typeorm';
 import { SnackDto } from './dto/snack.dto';
 import { decodeToken } from 'src/common/utils/decode-idtoken';
+import { Trab } from 'src/trab/entities/trab.entity';
 
 @Injectable()
 export class SnackService {
@@ -12,7 +13,7 @@ export class SnackService {
     private readonly snackRepository: Repository<Snack>,
   ) {}
 
-  async getSnackByUid(uid: string): Promise<Snack> {
+  async getSnackByUserId(uid: string): Promise<Snack> {
     try {
       const snack = await this.snackRepository.find({
         relations: {
@@ -39,11 +40,51 @@ export class SnackService {
     }
   }
 
-  async getSnack(idToken: string): Promise<SnackDto> {
+  async getSnackByTrabId(trabId: number): Promise<Snack> {
     try {
-      const uid: string = await decodeToken(idToken);
+      const snack: Snack[] = await this.snackRepository.find({
+        select: {
+          trab: {
+            trab_id: true,
+          },
+        },
+        where: {
+          trab: {
+            trab_id: trabId,
+          },
+        },
+      });
 
-      const userSnack = await this.getSnackByUid(uid);
+      if (snack.length !== 1) {
+        throw new NotFoundException('snack entity를 찾는 과정에서 오류가 발생했습니다.');
+      }
+
+      return snack[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async createSnack(trab: Trab): Promise<void> {
+    try {
+      await this.snackRepository
+        .createQueryBuilder()
+        .insert()
+        .into(Snack)
+        .values([
+          {
+            trab: trab,
+          },
+        ])
+        .execute();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getSnack(trabId: number): Promise<SnackDto> {
+    try {
+      const userSnack = await this.getSnackByTrabId(trabId);
 
       const ret: SnackDto = {
         glass: userSnack.glass,
@@ -64,7 +105,7 @@ export class SnackService {
 
   async earnSnack(uid: string, trashType: string): Promise<Snack> {
     try {
-      const userSnack: Snack = await this.getSnackByUid(uid);
+      const userSnack: Snack = await this.getSnackByUserId(uid);
 
       if (userSnack[trashType] !== undefined) {
         userSnack[trashType] = (userSnack[trashType] as number) + 1;
@@ -82,7 +123,7 @@ export class SnackService {
 
   async earnSnacks(uid: string, trashMap: Map<string, number>): Promise<void> {
     try {
-      const userSnack: Snack = await this.getSnackByUid(uid);
+      const userSnack: Snack = await this.getSnackByUserId(uid);
 
       userSnack['glass'] = (userSnack['glass'] as number) + trashMap.get('glass');
       userSnack['paper'] = (userSnack['paper'] as number) + trashMap.get('paper');

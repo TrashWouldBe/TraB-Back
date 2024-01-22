@@ -9,9 +9,6 @@ export class Furniture {
   @Column({ type: 'varchar', nullable: false })
   name: string;
 
-  @Column({ type: 'varchar', nullable: false })
-  type: string;
-
   @Column({ type: 'boolean', nullable: false, default: false })
   is_arrange: boolean;
 

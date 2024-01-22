@@ -7,7 +7,7 @@ import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { TrabInfoDto } from './dto/trab-info.dto';
 import { FurnitureInfoDto } from './dto/furniture-info.dto';
 import { SnackDto } from 'src/snack/dto/snack.dto';
-import { CreateTrabDto } from './dto/create-trab.dato';
+import { CreateTrabDto } from './dto/create-trab.dto';
 
 @ApiTags('Trab')
 @Controller('trab')

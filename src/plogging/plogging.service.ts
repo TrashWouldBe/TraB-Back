@@ -7,7 +7,6 @@ import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { ImageService } from 'src/image/image.service';
-import { FilesUploadDto } from './dto/plogging-upload.dto';
 
 @Injectable()
 export class PloggingService {

@@ -1,5 +1,5 @@
-import { Controller, Get, Req } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SnackService } from './snack.service';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
 import { serializeMessage } from 'src/common/utils/serialize-message';
@@ -16,6 +16,10 @@ export class SnackController {
   @ApiOperation({
     summary: 'trab가 가지고 있는 간식 가져오는 api',
   })
+  @ApiQuery({
+    name: 'trab_id',
+    description: '트레비 id',
+  })
   @ApiResponse({
     status: 200,
     description: '성공: 간식 정보 반환',
@@ -29,9 +33,8 @@ export class SnackController {
     status: 500,
     description: '실패: 서버 자체 오류',
   })
-  async getSnack(@Req() request: Request): Promise<SerializedMessage> {
-    const token: string = request.headers['authorization'];
-    const data: SnackDto = await this.snackService.getSnack(token);
+  async getSnack(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
+    const data: SnackDto = await this.snackService.getSnack(trabId);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

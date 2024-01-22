@@ -13,7 +13,7 @@ export class ImageController {
 
   @UseInterceptors(FileInterceptor('image'))
   @Post()
-  // @ApiBearerAuth('id_token')
+  @ApiBearerAuth('id_token')
   @ApiOperation({
     summary: '[미완]쓰레기 사진을 저장하는 api',
   })
@@ -28,10 +28,6 @@ export class ImageController {
         },
       },
     },
-  })
-  @ApiQuery({
-    name: 'token',
-    type: String,
   })
   @ApiResponse({
     status: 201,
@@ -48,9 +44,8 @@ export class ImageController {
   async uploadNormalTrashImage(
     @Req() request: Request,
     @UploadedFile() image: Express.Multer.File,
-    @Query('token') token: string,
   ): Promise<SerializedMessage> {
-    // const token: string = request.headers['authorization'];
+    const token: string = request.headers['authorization'];
     const data: string = await this.imageService.uploadNormalTrashImage(token, image);
     return serializeMessage({
       code: SUCCESS_CODE,

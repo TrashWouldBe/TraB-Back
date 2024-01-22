@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TrabService } from './trab.service';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
@@ -7,6 +7,7 @@ import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { TrabInfoDto } from './dto/trab-info.dto';
 import { FurnitureInfoDto } from './dto/furniture-info.dto';
 import { SnackDto } from 'src/snack/dto/snack.dto';
+import { CreateTrabDto } from './dto/create-trab.dato';
 
 @ApiTags('Trab')
 @Controller('trab')
@@ -42,10 +43,6 @@ export class TrabController {
   @ApiOperation({
     summary: 'trab를 만드는 api',
   })
-  @ApiQuery({
-    name: 'name',
-    description: '트레비 이름',
-  })
   @ApiResponse({
     status: 201,
     description: '성공: trab 정보 반환',
@@ -55,9 +52,9 @@ export class TrabController {
     status: 500,
     description: '실패: 서버 자체 에러',
   })
-  async createTrab(@Req() request: Request, @Query('name') name: string): Promise<SerializedMessage> {
+  async createTrab(@Req() request: Request, @Body() createTrabDTO: CreateTrabDto): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data: TrabInfoDto = await this.trabService.createTrab(token, name);
+    const data: TrabInfoDto = await this.trabService.createTrab(token, createTrabDTO.name);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

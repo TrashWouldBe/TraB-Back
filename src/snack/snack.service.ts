@@ -40,6 +40,31 @@ export class SnackService {
     }
   }
 
+  async getSnackByTrabId(trabId: number): Promise<Snack> {
+    try {
+      const snack: Snack[] = await this.snackRepository.find({
+        select: {
+          trab: {
+            trab_id: true,
+          },
+        },
+        where: {
+          trab: {
+            trab_id: trabId,
+          },
+        },
+      });
+
+      if (snack.length !== 1) {
+        throw new NotFoundException('snack entity를 찾는 과정에서 오류가 발생했습니다.');
+      }
+
+      return snack[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async createSnack(trab: Trab): Promise<void> {
     try {
       await this.snackRepository
@@ -57,11 +82,9 @@ export class SnackService {
     }
   }
 
-  async getSnack(idToken: string): Promise<SnackDto> {
+  async getSnack(trabId: number): Promise<SnackDto> {
     try {
-      const uid: string = await decodeToken(idToken);
-
-      const userSnack = await this.getSnackByUserId(uid);
+      const userSnack = await this.getSnackByTrabId(trabId);
 
       const ret: SnackDto = {
         glass: userSnack.glass,

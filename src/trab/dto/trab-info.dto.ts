@@ -2,12 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class TrabInfoDto {
   @ApiProperty({
+    example: 7,
+  })
+  trabId: number;
+
+  @ApiProperty({
     example: '우하하',
   })
-  trab_name: string;
+  trabName: string;
 
   @ApiProperty({
     example: 13,
   })
-  snack_cnt: number;
+  snackCnt: number;
 }

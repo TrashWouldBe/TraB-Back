@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, NotAcceptableException, NotFoundException } fro
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { UserInfoDto } from './dto/user-info.dto';
+import { ReturnUserInfoDto } from './dto/return-user-info.dto';
 import { ImageService } from 'src/image/image.service';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { HttpServerError } from 'src/common/error/errorHandler';
@@ -55,7 +55,7 @@ export class UserService {
     }
   }
 
-  async getUserInfo(idToken: string): Promise<UserInfoDto> {
+  async getUserInfo(idToken: string): Promise<ReturnUserInfoDto> {
     try {
       const uid: string = await decodeToken(idToken);
 
@@ -73,7 +73,7 @@ export class UserService {
         throw new NotFoundException('유저를 찾을 수 없습니다.');
       }
 
-      const ret: UserInfoDto = {
+      const ret: ReturnUserInfoDto = {
         user_email: user[0].email,
         user_image: user[0].image,
       };

@@ -4,9 +4,9 @@ import { Furniture } from './entities/furniture.entity';
 import { Repository } from 'typeorm';
 import { Trab } from 'src/trab/entities/trab.entity';
 import { FURNITURE_LIST } from 'src/common/constants/furniture-list';
-import { FurnitureInfoDto } from './dto/furniture-info.dto';
-import { SnackDto } from 'src/snack/dto/snack.dto';
-import { MakeFurnitureDto } from './dto/make-furniture.dto';
+import { ReturnFurnitureInfoDto } from './dto/return-furniture-info.dto';
+import { ReturnSnackDto } from 'src/snack/dto/return-snack.dto';
+import { GetFurnitureDto } from './dto/get-furniture.dto';
 import { SnackService } from 'src/snack/snack.service';
 
 @Injectable()
@@ -36,7 +36,7 @@ export class FurnitureService {
     }
   }
 
-  async getFurnitureList(trabId: number): Promise<FurnitureInfoDto[]> {
+  async getFurnitureList(trabId: number): Promise<ReturnFurnitureInfoDto[]> {
     try {
       const furnitures: Furniture[] = await this.furnitureRepository.find({
         select: {
@@ -51,10 +51,10 @@ export class FurnitureService {
         },
       });
 
-      const ret: FurnitureInfoDto[] = [];
+      const ret: ReturnFurnitureInfoDto[] = [];
 
       furnitures.forEach((furniture) => {
-        const temp: FurnitureInfoDto = {
+        const temp: ReturnFurnitureInfoDto = {
           furnitureId: furniture.furniture_id,
           name: furniture.name,
           isArrange: furniture.is_arrange,
@@ -70,13 +70,13 @@ export class FurnitureService {
     }
   }
 
-  async getFurnitureInfo(furnitureName: string): Promise<SnackDto> {
+  async getFurnitureInfo(furnitureName: string): Promise<ReturnSnackDto> {
     try {
       const furnitures = Object.values(FURNITURE_LIST);
 
       const targetFurniture = furnitures.find((furniture) => furniture.furnitureName === furnitureName);
 
-      const ret: SnackDto = {
+      const ret: ReturnSnackDto = {
         glass: targetFurniture.glass,
         paper: targetFurniture.paper,
         can: targetFurniture.can,
@@ -93,7 +93,7 @@ export class FurnitureService {
     }
   }
 
-  async getArrangedFurnitureList(trabId: number): Promise<FurnitureInfoDto[]> {
+  async getArrangedFurnitureList(trabId: number): Promise<ReturnFurnitureInfoDto[]> {
     try {
       const furnitures: Furniture[] = await this.furnitureRepository.find({
         select: {
@@ -109,10 +109,10 @@ export class FurnitureService {
         },
       });
 
-      const ret: FurnitureInfoDto[] = [];
+      const ret: ReturnFurnitureInfoDto[] = [];
 
       furnitures.forEach((furniture) => {
-        const temp: FurnitureInfoDto = {
+        const temp: ReturnFurnitureInfoDto = {
           furnitureId: furniture.furniture_id,
           name: furniture.name,
           isArrange: furniture.is_arrange,
@@ -128,7 +128,7 @@ export class FurnitureService {
     }
   }
 
-  async makeFurniture(makeFurnitureDto: MakeFurnitureDto): Promise<FurnitureInfoDto> {
+  async makeFurniture(getFurnitureDto: GetFurnitureDto): Promise<ReturnFurnitureInfoDto> {
     try {
       /*
         1. snack table을 가져옴
@@ -137,8 +137,8 @@ export class FurnitureService {
         4. snack table에서 그만큼 소모 시킴 
         5. furniture table에 is_get 변수 true로 변경
       */
-      const trabId: number = makeFurnitureDto.trabId;
-      const furnitureName: string = makeFurnitureDto.furnitureName;
+      const trabId: number = getFurnitureDto.trabId;
+      const furnitureName: string = getFurnitureDto.furnitureName;
 
       // 1 2 3 4
       await this.snackService.useSnack(trabId, furnitureName);
@@ -171,7 +171,7 @@ export class FurnitureService {
         },
       });
 
-      const ret: FurnitureInfoDto = {
+      const ret: ReturnFurnitureInfoDto = {
         furnitureId: check[0].furniture_id,
         name: check[0].name,
         isArrange: check[0].is_arrange,

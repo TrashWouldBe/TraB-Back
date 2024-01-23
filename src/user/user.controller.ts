@@ -1,7 +1,7 @@
 import { Controller, Delete, Get, Patch, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { UserInfoDto } from './dto/user-info.dto';
+import { ReturnUserInfoDto } from './dto/return-user-info.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { userErrorCode } from 'src/common/error/errorCode';
 import { serializeMessage } from 'src/common/utils/serialize-message';
@@ -21,7 +21,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '성공: 유저 정보 반환',
-    type: UserInfoDto,
+    type: ReturnUserInfoDto,
   })
   @ApiResponse({
     status: 404,
@@ -37,7 +37,7 @@ export class UserController {
   })
   async getUserInfo(@Req() request: Request): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data: UserInfoDto = await this.userService.getUserInfo(token);
+    const data: ReturnUserInfoDto = await this.userService.getUserInfo(token);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

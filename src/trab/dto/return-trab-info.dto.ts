@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class TrabInfoDto {
+export class ReturnTrabInfoDto {
   @ApiProperty({
     example: 7,
   })

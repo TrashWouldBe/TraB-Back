@@ -2,7 +2,7 @@ import { Inject, Injectable, NotAcceptableException, NotFoundException, forwardR
 import { InjectRepository } from '@nestjs/typeorm';
 import { Snack } from './entities/snack.entity';
 import { Repository } from 'typeorm';
-import { SnackDto } from './dto/snack.dto';
+import { ReturnSnackDto } from './dto/return-snack.dto';
 import { Trab } from 'src/trab/entities/trab.entity';
 import { FURNITURE_LIST } from 'src/common/constants/furniture-list';
 import { ReturnSnackImageInfoDto } from './dto/return-snack-image-info.dto';
@@ -108,11 +108,11 @@ export class SnackService {
     }
   }
 
-  async getSnack(trabId: number): Promise<SnackDto> {
+  async getSnack(trabId: number): Promise<ReturnSnackDto> {
     try {
       const userSnack = await this.getSnackByTrabId(trabId);
 
-      const ret: SnackDto = {
+      const ret: ReturnSnackDto = {
         glass: userSnack.glass,
         paper: userSnack.paper,
         can: userSnack.can,

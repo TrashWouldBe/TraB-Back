@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class FurnitureInfoDto {
+export class ReturnFurnitureInfoDto {
   @ApiProperty({
     example: 7,
   })

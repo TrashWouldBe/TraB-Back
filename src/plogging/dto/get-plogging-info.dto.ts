@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class FilesUploadDto {
+export class GetPloggingInfoDto {
   @ApiProperty({ type: 'string', description: '운행 날짜' })
   runDate: string;
 

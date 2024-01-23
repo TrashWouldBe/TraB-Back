@@ -6,6 +6,7 @@ import { SnackDto } from './dto/snack.dto';
 import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { Trab } from 'src/trab/entities/trab.entity';
 import { Trash_image } from 'src/image/entities/trash_image.entity';
+import { FURNITURE_LIST } from 'src/common/constants/furniture-list';
 
 @Injectable()
 export class SnackService {
@@ -173,6 +174,54 @@ export class SnackService {
       await this.snackRepository.save(userSnack);
     } catch (error) {
       throw Error('간식 개수 저장과정에서 오류 발생');
+    }
+  }
+
+  async useSnack(trabId: number, furnitureName: string): Promise<void> {
+    try {
+      // 1
+      const userSnack: Snack = await this.getSnackByTrabId(trabId);
+
+      // 2
+      const furnitures = Object.values(FURNITURE_LIST);
+      const targetFurniture = furnitures.find((furniture) => furniture.furnitureName === furnitureName);
+
+      // 3
+      if (
+        userSnack.glass < targetFurniture.glass ||
+        userSnack.paper < targetFurniture.paper ||
+        userSnack.can < targetFurniture.can ||
+        userSnack.plastic < targetFurniture.plastic ||
+        userSnack.vinyl < targetFurniture.vinyl ||
+        userSnack.styrofoam < targetFurniture.styrofoam ||
+        userSnack.general_waste < targetFurniture.general_waste ||
+        userSnack.food_waste < targetFurniture.food_waste
+      ) {
+        throw new NotAcceptableException('가지고 있는 간식 개수가 부족합니다.');
+      }
+
+      // 4
+      const result = await this.snackRepository
+        .createQueryBuilder()
+        .update(Snack)
+        .set({
+          glass: userSnack.glass - targetFurniture.glass,
+          paper: userSnack.paper - targetFurniture.paper,
+          can: userSnack.can - targetFurniture.can,
+          plastic: userSnack.plastic - targetFurniture.plastic,
+          vinyl: userSnack.vinyl - targetFurniture.vinyl,
+          styrofoam: userSnack.styrofoam - targetFurniture.styrofoam,
+          general_waste: userSnack.general_waste - targetFurniture.general_waste,
+          food_waste: userSnack.food_waste - targetFurniture.food_waste,
+        })
+        .where('snack_id = :snack_id', { snack_id: userSnack.snack_id })
+        .execute();
+
+      if (result.affected === 0) {
+        throw new NotAcceptableException('디비 저장과정에서 오류가 발생했습니다1.');
+      }
+    } catch (error) {
+      throw error;
     }
   }
 }

@@ -1,17 +1,21 @@
-import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotAcceptableException, NotFoundException, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Snack } from './entities/snack.entity';
 import { Repository } from 'typeorm';
 import { SnackDto } from './dto/snack.dto';
-import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { Trab } from 'src/trab/entities/trab.entity';
 import { FURNITURE_LIST } from 'src/common/constants/furniture-list';
+import { ReturnSnackImageInfoDto } from './dto/return-snack-image-info.dto';
+import { ImageService } from 'src/image/image.service';
+import { Trash_image } from 'src/image/entities/trash_image.entity';
 
 @Injectable()
 export class SnackService {
   constructor(
     @InjectRepository(Snack)
     private readonly snackRepository: Repository<Snack>,
+    @Inject(forwardRef(() => ImageService))
+    private readonly imageService: ImageService,
   ) {}
 
   async getSnackByUserId(uid: string): Promise<Snack> {
@@ -61,6 +65,27 @@ export class SnackService {
       }
 
       return snack[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getSnackImages(trabId: number): Promise<ReturnSnackImageInfoDto[]> {
+    try {
+      const userSnack = await this.getSnackByTrabId(trabId);
+
+      const snackTrashImages: Trash_image[] = await this.imageService.getSnackTrashImages(userSnack.snack_id);
+
+      const ret: ReturnSnackImageInfoDto[] = snackTrashImages.map((trash) => ({
+        imageUrl: trash.image,
+        trashType: trash.trash_tag,
+      }));
+
+      if (ret.length === 0) {
+        throw new NotFoundException('모은 쓰레기가 없는디요?\n');
+      }
+
+      return ret;
     } catch (error) {
       throw error;
     }

@@ -5,15 +5,22 @@ import { SerializedMessage } from 'src/common/types/serialized-message.type';
 import { serializeMessage } from 'src/common/utils/serialize-message';
 import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { TrabInfoDto } from './dto/trab-info.dto';
-import { FurnitureInfoDto } from './dto/furniture-info.dto';
+import { FurnitureInfoDto } from '../furniture/dto/furniture-info.dto';
 import { SnackDto } from 'src/snack/dto/snack.dto';
 import { CreateTrabDto } from './dto/create-trab.dto';
-import { MakeFurnitureDto } from './dto/make-furniture.dto';
+import { MakeFurnitureDto } from '../furniture/dto/make-furniture.dto';
+import { SnackService } from 'src/snack/snack.service';
+import { ReturnSnackImageInfoDto } from 'src/snack/dto/return-snack-image-info.dto';
+import { FurnitureService } from 'src/furniture/furniture.service';
 
 @ApiTags('Trab')
 @Controller('trab')
 export class TrabController {
-  constructor(private readonly trabService: TrabService) {}
+  constructor(
+    private readonly trabService: TrabService,
+    private readonly snackService: SnackService,
+    private readonly furnitureService: FurnitureService,
+  ) {}
 
   @Get()
   @ApiBearerAuth('id_token')
@@ -82,7 +89,7 @@ export class TrabController {
     description: '실패: 서버 자체 에러',
   })
   async getFurnitureList(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
-    const data: FurnitureInfoDto[] = await this.trabService.getFurnitureList(trabId);
+    const data: FurnitureInfoDto[] = await this.furnitureService.getFurnitureList(trabId);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -109,7 +116,7 @@ export class TrabController {
     description: '실패: 서버 자체 에러',
   })
   async getFurnitureInfo(@Query('furniture_name') furnitureName: string): Promise<SerializedMessage> {
-    const data: SnackDto = await this.trabService.getFurnitureInfo(furnitureName);
+    const data: SnackDto = await this.furnitureService.getFurnitureInfo(furnitureName);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -136,7 +143,7 @@ export class TrabController {
     description: '실패: 서버 자체 에러',
   })
   async getArrangedFurnitureList(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
-    const data: FurnitureInfoDto[] = await this.trabService.getArrangedFurnitureList(trabId);
+    const data: FurnitureInfoDto[] = await this.furnitureService.getArrangedFurnitureList(trabId);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -166,7 +173,69 @@ export class TrabController {
     description: '실패: 서버 자체 에러',
   })
   async makeFurniture(@Body() makeFurnitureDto: MakeFurnitureDto): Promise<SerializedMessage> {
-    const data: FurnitureInfoDto = await this.trabService.makeFurniture(makeFurnitureDto);
+    const data: FurnitureInfoDto = await this.furnitureService.makeFurniture(makeFurnitureDto);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
+
+  @Get('/snack')
+  @ApiBearerAuth('id_token')
+  @ApiOperation({
+    summary: 'trab가 가지고 있는 간식 가져오는 api',
+  })
+  @ApiQuery({
+    name: 'trab_id',
+    description: '트레비 id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공: 간식 정보 반환',
+    type: SnackDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '실패: snack entity / uid 발견 실패',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 오류',
+  })
+  async getSnack(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
+    const data: SnackDto = await this.snackService.getSnack(trabId);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
+
+  @Get('/snack/trashList')
+  @ApiBearerAuth('id_token')
+  @ApiOperation({
+    summary: 'trab가 가지고 있는 간식 사진 가져오는 api',
+  })
+  @ApiQuery({
+    name: 'trab_id',
+    description: '트레비 id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공: 간식 사진 정보 반환',
+    type: ReturnSnackImageInfoDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '실패: snack entity / uid 발견 실패',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 오류',
+  })
+  async getSnackImages(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
+    const data: ReturnSnackImageInfoDto[] = await this.snackService.getSnackImages(trabId);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

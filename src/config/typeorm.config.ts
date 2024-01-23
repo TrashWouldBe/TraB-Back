@@ -3,7 +3,7 @@ import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { Plogging } from 'src/plogging/entities/plogging.entity';
 import { Trash_image } from 'src/image/entities/trash_image.entity';
 import { Snack } from 'src/snack/entities/snack.entity';
-import { Furniture } from 'src/trab/entities/furniture.entity';
+import { Furniture } from 'src/furniture/entities/furniture.entity';
 import { Trab } from 'src/trab/entities/trab.entity';
 import { Inquire } from 'src/user/entities/inquire.entity';
 import { User } from 'src/user/entities/user.entity';

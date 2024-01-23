@@ -163,4 +163,22 @@ export class ImageService {
       throw error;
     }
   }
+
+  async getSnackTrashImages(snackId: number): Promise<Trash_image[]> {
+    try {
+      const trashImages: Trash_image[] = await this.trashImageRepository.find({
+        where: {
+          snack: {
+            snack_id: snackId,
+          },
+        },
+        order: {
+          date: 'DESC',
+        },
+      });
+      return trashImages;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

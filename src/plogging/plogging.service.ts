@@ -78,4 +78,36 @@ export class PloggingService {
       throw error;
     }
   }
+
+    //uid에 맞는 ploggings 반환 
+    async getMyPloggingList(uid: string): Promise<PloggingInfoDto[]> {
+      try{
+        const ploggings: Plogging[] = await this.ploggingRepository.find({
+          where:{
+            user : {
+              uid : uid,
+            },
+          }
+        });
+
+        const temp: PloggingInfoDto[] = [];
+
+        ploggings.forEach((plogging)=>{
+          const plog_temp: PloggingInfoDto = {
+            runDate: plogging.run_date,
+            runName: plogging.run_name,
+            runRange: plogging.run_range,
+            runTime: plogging.run_time,
+          };
+
+          temp.push(plog_temp);
+        });
+
+        return temp;
+      } catch(error) {
+        throw error;
+      }
+    }
+  
+  
 }

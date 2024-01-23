@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Patch, Post, Query, Req } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TrabService } from './trab.service';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
 import { serializeMessage } from 'src/common/utils/serialize-message';
@@ -8,6 +8,7 @@ import { TrabInfoDto } from './dto/trab-info.dto';
 import { FurnitureInfoDto } from './dto/furniture-info.dto';
 import { SnackDto } from 'src/snack/dto/snack.dto';
 import { CreateTrabDto } from './dto/create-trab.dto';
+import { MakeFurnitureDto } from './dto/make-furniture.dto';
 
 @ApiTags('Trab')
 @Controller('trab')
@@ -136,6 +137,36 @@ export class TrabController {
   })
   async getArrangedFurnitureList(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
     const data: FurnitureInfoDto[] = await this.trabService.getArrangedFurnitureList(trabId);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
+
+  @Patch('/furniture')
+  @ApiBearerAuth('id_token')
+  @ApiOperation({
+    summary: '가구를 만드는 api',
+  })
+  @ApiBody({
+    type: MakeFurnitureDto,
+  })
+  @ApiResponse({
+    status: 201,
+    description: '성공: 만들어진 가구 정보를 반환',
+    type: FurnitureInfoDto,
+  })
+  @ApiResponse({
+    status: 406,
+    description: '실패: 가지고 있는 간식 개수 부족 / db 저장 과정에서 오류 발생',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 에러',
+  })
+  async makeFurniture(@Body() makeFurnitureDto: MakeFurnitureDto): Promise<SerializedMessage> {
+    const data: FurnitureInfoDto = await this.trabService.makeFurniture(makeFurnitureDto);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

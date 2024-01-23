@@ -7,6 +7,7 @@ import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { ImageService } from 'src/image/image.service';
+import { ReturnPloggingInfoDto } from './dto/return-plogging-info.dto';
 
 @Injectable()
 export class PloggingService {
@@ -41,16 +42,6 @@ export class PloggingService {
     } catch (error) {
       throw error;
     }
-  }
-
-  async changePloggingToDTO(pp: Plogging): Promise<PloggingInfoDto>{
-    const temp: PloggingInfoDto = {
-      runDate: pp.run_date,
-      runName: pp.run_name,
-      runRange: pp.run_range,
-      runTime: pp.run_time,
-    };
-    return temp;
   }
 
   async uploadPlogging(
@@ -89,36 +80,57 @@ export class PloggingService {
     }
   }
 
-    //uid에 맞는 ploggings 반환 
-    async getMyPloggingList(token: string): Promise<PloggingInfoDto[]> {
-      try{
-        const uid: string = await decodeToken(token);
-        const ploggings: Plogging[] = await this.ploggingRepository.find({
-          where:{
-            user : {
-              uid : uid,
-            },
-          }
-        });
+  async getPloggingList(token: string): Promise<ReturnPloggingInfoDto[]> {
+    try {
+      const uid: string = await decodeToken(token);
+      const ploggings: Plogging[] = await this.ploggingRepository.find({
+        where: {
+          user: {
+            uid: uid,
+          },
+        },
+      });
 
-        const temp: PloggingInfoDto[] = [];
+      const ret: ReturnPloggingInfoDto[] = [];
 
-        ploggings.forEach((plogging)=>{
-          const plog_temp: PloggingInfoDto = {
-            runDate: plogging.run_date,
-            runName: plogging.run_name,
-            runRange: plogging.run_range,
-            runTime: plogging.run_time,
-          };
+      ploggings.forEach((plogging) => {
+        const temp: ReturnPloggingInfoDto = {
+          plggingId: plogging.plogging_id,
+          runDate: plogging.run_date,
+          runName: plogging.run_name,
+          runRange: plogging.run_range,
+          runTime: plogging.run_time,
+          trabSanck: plogging.trab_snack,
+          calorie: plogging.calorie,
+        };
 
-          temp.push(plog_temp);
-        });
+        ret.push(temp);
+      });
 
-        return temp;
-      } catch(error) {
-        throw error;
-      }
+      return ret;
+    } catch (error) {
+      throw error;
     }
-  
-  
+  }
+
+  async getPloggingInfo(idToken: string, pid: number): Promise<ReturnPloggingInfoDto> {
+    try {
+      const uid: string = await decodeToken(idToken);
+      const targetPlogging: Plogging = await this.getPloggingByUserIdAndPloggingId(uid, pid);
+
+      const ret: ReturnPloggingInfoDto = {
+        plggingId: targetPlogging.plogging_id,
+        runDate: targetPlogging.run_date,
+        runName: targetPlogging.run_name,
+        runRange: targetPlogging.run_range,
+        runTime: targetPlogging.run_time,
+        trabSanck: targetPlogging.trab_snack,
+        calorie: targetPlogging.calorie,
+      };
+
+      return ret;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

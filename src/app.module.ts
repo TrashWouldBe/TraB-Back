@@ -11,6 +11,7 @@ import { TrabModule } from './trab/trab.module';
 import { PloggingModule } from './plogging/plogging.module';
 import { SnackModule } from './snack/snack.module';
 import { ImageModule } from './image/image.module';
+import { FurnitureModule } from './furniture/furniture.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ImageModule } from './image/image.module';
     PloggingModule,
     SnackModule,
     ImageModule,
+    FurnitureModule,
   ],
   controllers: [AppController],
   providers: [AppService],

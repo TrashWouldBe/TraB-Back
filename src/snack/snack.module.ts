@@ -1,14 +1,14 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { SnackController } from './snack.controller';
 import { SnackService } from './snack.service';
 import { Snack } from './entities/snack.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Trash_image } from 'src/image/entities/trash_image.entity';
+import { ImageModule } from 'src/image/image.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Snack, Trash_image])],
+  imports: [TypeOrmModule.forFeature([Snack]), forwardRef(() => ImageModule)],
   controllers: [SnackController],
-  providers: [SnackService, Trash_image],
+  providers: [SnackService],
   exports: [SnackService],
 })
 export class SnackModule {}

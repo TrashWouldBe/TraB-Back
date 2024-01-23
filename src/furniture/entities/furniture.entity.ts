@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Trab } from './trab.entity';
+import { Trab } from '../../trab/entities/trab.entity';
 
 @Entity('furniture')
 export class Furniture {

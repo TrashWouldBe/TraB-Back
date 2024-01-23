@@ -1,16 +1,13 @@
-import { Body, Controller, Get, Post, Query, Req, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Query, Req, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PloggingService } from './plogging.service';
-import { PloggingInfoDto } from './dto/plogging-info.dto';
 import { User } from 'src/user/entities/user.entity';
 import { serializeMessage } from 'src/common/utils/serialize-message';
 import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
 import { FilesUploadDto } from './dto/plogging-upload.dto';
-import { get } from 'http';
-import { query } from 'express';
-import { Plogging } from './entities/plogging.entity';
+import { ReturnPloggingInfoDto } from './dto/return-plogging-info.dto';
 
 @ApiTags('Plogging')
 @Controller('plogging')
@@ -50,36 +47,28 @@ export class PloggingController {
     });
   }
 
-  @Get('/plogginginfo')
+  @Get()
   @ApiBearerAuth('id_token')
   @ApiOperation({
-    summary: 'uid, plogging id 로 plogging 정보를 가져오는 api',
+    summary: 'plogging 정보를 가져오는 api',
   })
-  @ApiQuery({
-    name: 'uid',
-    description: 'user id',
-    type: 'string'
-  })
-
   @ApiQuery({
     name: 'plogging_id',
-    description: 'plogging id',
-    type: 'number'
+    description: '플로깅 id',
+    type: 'number',
   })
-  
   @ApiResponse({
     status: 201,
-    description: '성공: my plogging list 반환',
-    type: PloggingInfoDto,
+    description: '성공: 해당 plogging 정보 반환',
+    type: ReturnPloggingInfoDto,
   })
   @ApiResponse({
     status: 500,
     description: '실패: 서버 자체 에러',
   })
-  async getPloggingInfo(@Req() request: Request,@Query('plogging_id') pid: number): Promise<SerializedMessage> {
+  async getPloggingInfo(@Req() request: Request, @Query('plogging_id') pid: number): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const temp: Plogging = await this.ploggingService.getPloggingByUserIdAndPloggingId(token, pid);
-    const data: PloggingInfoDto = await this.ploggingService.changePloggingToDTO(temp);
+    const data: ReturnPloggingInfoDto = await this.ploggingService.getPloggingInfo(token, pid);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -87,27 +76,23 @@ export class PloggingController {
     });
   }
 
-  @Get('/plogging/myplogginglist')
+  @Get('/list')
   @ApiBearerAuth('id_token')
   @ApiOperation({
-    summary: 'user 본인의 plogging 리스트를 가져오는 api',
-  })
-  @ApiQuery({
-    name: 'uid',
-    description: 'user id',
+    summary: 'plogging 리스트를 가져오는 api',
   })
   @ApiResponse({
     status: 201,
-    description: '성공: my plogging list 반환',
-    type: PloggingInfoDto,
+    description: '성공: plogging list 반환',
+    type: ReturnPloggingInfoDto,
   })
   @ApiResponse({
     status: 500,
     description: '실패: 서버 자체 에러',
   })
-  async getMyPloggingList(@Req() request: Request): Promise<SerializedMessage> {
+  async getPloggingList(@Req() request: Request): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data: PloggingInfoDto[] = await this.ploggingService.getMyPloggingList(token);
+    const data: ReturnPloggingInfoDto[] = await this.ploggingService.getPloggingList(token);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

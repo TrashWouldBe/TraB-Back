@@ -43,6 +43,16 @@ export class PloggingService {
     }
   }
 
+  async changePloggingToDTO(pp: Plogging): Promise<PloggingInfoDto>{
+    const temp: PloggingInfoDto = {
+      runDate: pp.run_date,
+      runName: pp.run_name,
+      runRange: pp.run_range,
+      runTime: pp.run_time,
+    };
+    return temp;
+  }
+
   async uploadPlogging(
     idToken: string,
     images: Array<Express.Multer.File>,
@@ -80,8 +90,9 @@ export class PloggingService {
   }
 
     //uid에 맞는 ploggings 반환 
-    async getMyPloggingList(uid: string): Promise<PloggingInfoDto[]> {
+    async getMyPloggingList(token: string): Promise<PloggingInfoDto[]> {
       try{
+        const uid: string = await decodeToken(token);
         const ploggings: Plogging[] = await this.ploggingRepository.find({
           where:{
             user : {

@@ -5,12 +5,15 @@ import { Repository } from 'typeorm';
 import { SnackDto } from './dto/snack.dto';
 import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { Trab } from 'src/trab/entities/trab.entity';
+import { Trash_image } from 'src/image/entities/trash_image.entity';
 
 @Injectable()
 export class SnackService {
   constructor(
     @InjectRepository(Snack)
     private readonly snackRepository: Repository<Snack>,
+    @InjectRepository(Trash_image)
+    private readonly trashImageRepository: Repository<Trash_image>,
   ) {}
 
   async getSnackByUserId(uid: string): Promise<Snack> {
@@ -60,6 +63,39 @@ export class SnackService {
       }
 
       return snack[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getSnackPhotos(trabId: number): Promise<{ imageUrl: string; type: string }[]> {
+    try {
+      const snackid = await this.snackRepository.findOne({ 
+        where: { 
+          trab:{
+            trab_id: trabId
+    }}});
+
+      if(!snackid){
+        throw new NotFoundException('해당 id가 읎는디요?\n');
+      }
+      const snackData = await this.trashImageRepository.find({
+        where:{
+          snack:{
+            snack_id: snackid.snack_id,
+          }
+        }
+      })
+
+      const photoesAndTypes = snackData.map(trash=>({
+        imageUrl: trash.image,
+        type: trash.trash_tag
+      }))
+
+      if(snackData.length === 0){
+        throw new NotFoundException('모은 쓰레기가 없는디요?\n');
+      }
+      return photoesAndTypes;
     } catch (error) {
       throw error;
     }

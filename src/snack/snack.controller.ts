@@ -41,4 +41,35 @@ export class SnackController {
       data: data,
     });
   }
+
+  @Get('/myTrashList')
+  @ApiBearerAuth('id_token')
+  @ApiOperation({
+    summary: 'trab가 가지고 있는 간식 사진 가져오는 api',
+  })
+  @ApiQuery({
+    name: 'trab_id',
+    description: '트레비 id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공: 간식 사진 정보 반환',
+    type: SnackDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '실패: snack entity / uid 발견 실패',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 오류',
+  })
+  async getSnackPhoto(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
+    const data: { imageUrl: string; type: string }[] = await this.snackService.getSnackPhotos(trabId);
+    return serializeMessage({
+      code: SUCCESS_CODE, 
+      message: 'Success',
+      data: data,
+    });
+  }
 }

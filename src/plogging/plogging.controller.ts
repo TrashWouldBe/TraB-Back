@@ -9,6 +9,8 @@ import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
 import { FilesUploadDto } from './dto/plogging-upload.dto';
 import { get } from 'http';
+import { query } from 'express';
+import { Plogging } from './entities/plogging.entity';
 
 @ApiTags('Plogging')
 @Controller('plogging')
@@ -48,34 +50,42 @@ export class PloggingController {
     });
   }
 
-  // @Get('/plogginginfo')
-  // @ApiBearerAuth('id_token')
-  // @ApiOperation({
-  //   summary: 'plogging id 로 plogging 정보를 가져오는 api',
-  // })
-  // @ApiQuery({
-  //   name: 'uid',
-  //   description: 'user id',
-  // })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: '성공: my plogging list 반환',
-  //   type: PloggingInfoDto,
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description: '실패: 서버 자체 에러',
-  // })
-  // async getPloggingInfo(@Req() request: Request): Promise<SerializedMessage> {
-  //   const token: string = request.headers['authorization'];
-  //   const fid: 
-  //   const data: PloggingInfoDto[] = await this.ploggingService.getPloggingInfo(token,fid);
-  //   return serializeMessage({
-  //     code: SUCCESS_CODE,
-  //     message: 'Success',
-  //     data: data,
-  //   });
-  // }
+  @Get('/plogginginfo')
+  @ApiBearerAuth('id_token')
+  @ApiOperation({
+    summary: 'uid, plogging id 로 plogging 정보를 가져오는 api',
+  })
+  @ApiQuery({
+    name: 'uid',
+    description: 'user id',
+    type: 'string'
+  })
+
+  @ApiQuery({
+    name: 'plogging_id',
+    description: 'plogging id',
+    type: 'number'
+  })
+  
+  @ApiResponse({
+    status: 201,
+    description: '성공: my plogging list 반환',
+    type: PloggingInfoDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 에러',
+  })
+  async getPloggingInfo(@Req() request: Request,@Query('plogging_id') pid: number): Promise<SerializedMessage> {
+    const token: string = request.headers['authorization'];
+    const temp: Plogging = await this.ploggingService.getPloggingByUserIdAndPloggingId(token, pid);
+    const data: PloggingInfoDto = await this.ploggingService.changePloggingToDTO(temp);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
 
   @Get('/plogging/myplogginglist')
   @ApiBearerAuth('id_token')

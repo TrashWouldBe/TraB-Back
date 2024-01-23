@@ -4,11 +4,11 @@ import { TrabService } from './trab.service';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
 import { serializeMessage } from 'src/common/utils/serialize-message';
 import { SUCCESS_CODE } from 'src/common/constants/constants';
-import { TrabInfoDto } from './dto/trab-info.dto';
-import { FurnitureInfoDto } from '../furniture/dto/furniture-info.dto';
-import { SnackDto } from 'src/snack/dto/snack.dto';
-import { CreateTrabDto } from './dto/create-trab.dto';
-import { MakeFurnitureDto } from '../furniture/dto/make-furniture.dto';
+import { ReturnTrabInfoDto } from './dto/return-trab-info.dto';
+import { ReturnFurnitureInfoDto } from '../furniture/dto/return-furniture-info.dto';
+import { ReturnSnackDto } from 'src/snack/dto/return-snack.dto';
+import { GetTrabDto } from './dto/get-trab.dto';
+import { GetFurnitureDto } from '../furniture/dto/get-furniture.dto';
 import { SnackService } from 'src/snack/snack.service';
 import { ReturnSnackImageInfoDto } from 'src/snack/dto/return-snack-image-info.dto';
 import { FurnitureService } from 'src/furniture/furniture.service';
@@ -30,7 +30,7 @@ export class TrabController {
   @ApiResponse({
     status: 201,
     description: '성공: 처음이면 null. 아니면 trab 정보 반환',
-    type: TrabInfoDto,
+    type: ReturnTrabInfoDto,
   })
   @ApiResponse({
     status: 406,
@@ -38,7 +38,7 @@ export class TrabController {
   })
   async checkIsTrab(@Req() request: Request): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data = await this.trabService.getTrab(token);
+    const data: ReturnTrabInfoDto | null = await this.trabService.getTrab(token);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -51,18 +51,21 @@ export class TrabController {
   @ApiOperation({
     summary: 'trab를 만드는 api',
   })
+  @ApiBody({
+    type: GetTrabDto,
+  })
   @ApiResponse({
     status: 201,
     description: '성공: trab 정보 반환',
-    type: TrabInfoDto,
+    type: ReturnTrabInfoDto,
   })
   @ApiResponse({
     status: 500,
     description: '실패: 서버 자체 에러',
   })
-  async createTrab(@Req() request: Request, @Body() createTrabDTO: CreateTrabDto): Promise<SerializedMessage> {
+  async createTrab(@Req() request: Request, @Body() getTrabDto: GetTrabDto): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data: TrabInfoDto = await this.trabService.createTrab(token, createTrabDTO.name);
+    const data: ReturnTrabInfoDto = await this.trabService.createTrab(token, getTrabDto.name);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -82,14 +85,14 @@ export class TrabController {
   @ApiResponse({
     status: 201,
     description: '성공: furniture list 반환',
-    type: FurnitureInfoDto,
+    type: ReturnFurnitureInfoDto,
   })
   @ApiResponse({
     status: 500,
     description: '실패: 서버 자체 에러',
   })
   async getFurnitureList(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
-    const data: FurnitureInfoDto[] = await this.furnitureService.getFurnitureList(trabId);
+    const data: ReturnFurnitureInfoDto[] = await this.furnitureService.getFurnitureList(trabId);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -109,14 +112,14 @@ export class TrabController {
   @ApiResponse({
     status: 201,
     description: '성공: furniture 간식 정보 반환',
-    type: SnackDto,
+    type: ReturnSnackDto,
   })
   @ApiResponse({
     status: 500,
     description: '실패: 서버 자체 에러',
   })
   async getFurnitureInfo(@Query('furniture_name') furnitureName: string): Promise<SerializedMessage> {
-    const data: SnackDto = await this.furnitureService.getFurnitureInfo(furnitureName);
+    const data: ReturnSnackDto = await this.furnitureService.getFurnitureInfo(furnitureName);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -136,14 +139,14 @@ export class TrabController {
   @ApiResponse({
     status: 201,
     description: '성공: 배치된 가구 정보 반환',
-    type: FurnitureInfoDto,
+    type: ReturnFurnitureInfoDto,
   })
   @ApiResponse({
     status: 500,
     description: '실패: 서버 자체 에러',
   })
   async getArrangedFurnitureList(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
-    const data: FurnitureInfoDto[] = await this.furnitureService.getArrangedFurnitureList(trabId);
+    const data: ReturnFurnitureInfoDto[] = await this.furnitureService.getArrangedFurnitureList(trabId);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -157,12 +160,12 @@ export class TrabController {
     summary: '가구를 만드는 api',
   })
   @ApiBody({
-    type: MakeFurnitureDto,
+    type: GetFurnitureDto,
   })
   @ApiResponse({
     status: 201,
     description: '성공: 만들어진 가구 정보를 반환',
-    type: FurnitureInfoDto,
+    type: ReturnFurnitureInfoDto,
   })
   @ApiResponse({
     status: 406,
@@ -172,8 +175,8 @@ export class TrabController {
     status: 500,
     description: '실패: 서버 자체 에러',
   })
-  async makeFurniture(@Body() makeFurnitureDto: MakeFurnitureDto): Promise<SerializedMessage> {
-    const data: FurnitureInfoDto = await this.furnitureService.makeFurniture(makeFurnitureDto);
+  async makeFurniture(@Body() getFurnitureDto: GetFurnitureDto): Promise<SerializedMessage> {
+    const data: ReturnFurnitureInfoDto = await this.furnitureService.makeFurniture(getFurnitureDto);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -193,7 +196,7 @@ export class TrabController {
   @ApiResponse({
     status: 200,
     description: '성공: 간식 정보 반환',
-    type: SnackDto,
+    type: ReturnSnackDto,
   })
   @ApiResponse({
     status: 404,
@@ -204,7 +207,7 @@ export class TrabController {
     description: '실패: 서버 자체 오류',
   })
   async getSnack(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
-    const data: SnackDto = await this.snackService.getSnack(trabId);
+    const data: ReturnSnackDto = await this.snackService.getSnack(trabId);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

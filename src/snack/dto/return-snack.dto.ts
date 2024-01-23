@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SnackDto {
+export class ReturnSnackDto {
   @ApiProperty({
     example: 2,
   })

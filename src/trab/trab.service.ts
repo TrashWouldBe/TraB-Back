@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
-import { TrabInfoDto } from './dto/trab-info.dto';
+import { ReturnTrabInfoDto } from './dto/return-trab-info.dto';
 import { SnackService } from 'src/snack/snack.service';
 import { FurnitureService } from 'src/furniture/furniture.service';
 
@@ -35,7 +35,7 @@ export class TrabService {
     }
   }
 
-  async getTrab(idToken: string): Promise<TrabInfoDto | null> {
+  async getTrab(idToken: string): Promise<ReturnTrabInfoDto | null> {
     try {
       const uid: string = await decodeToken(idToken);
       const user: User = await this.userService.getUserByUserId(uid);
@@ -50,7 +50,7 @@ export class TrabService {
       else if (trabs.length !== 1) {
         throw new NotAcceptableException('trab가 여러마리입니다.');
       } else {
-        const ret: TrabInfoDto = {
+        const ret: ReturnTrabInfoDto = {
           trabId: trabs[0].trab_id,
           trabName: trabs[0].trab_name,
           snackCnt: trabs[0].snack_cnt,
@@ -62,7 +62,7 @@ export class TrabService {
     }
   }
 
-  async createTrab(idToken: string, name: string): Promise<TrabInfoDto> {
+  async createTrab(idToken: string, name: string): Promise<ReturnTrabInfoDto> {
     try {
       const uid: string = await decodeToken(idToken);
       const user: User = await this.userService.getUserByUserId(uid);
@@ -84,7 +84,7 @@ export class TrabService {
       await this.snackService.createSnack(nowTrab);
       await this.furnitureService.createFurniture(nowTrab);
 
-      const ret: TrabInfoDto = {
+      const ret: ReturnTrabInfoDto = {
         trabId: nowTrab.trab_id,
         trabName: nowTrab.trab_name,
         snackCnt: nowTrab.snack_cnt,

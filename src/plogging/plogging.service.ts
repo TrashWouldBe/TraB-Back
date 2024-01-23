@@ -2,12 +2,12 @@ import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/commo
 import { Repository } from 'typeorm';
 import { Plogging } from './entities/plogging.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PloggingInfoDto } from './dto/plogging-info.dto';
 import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { ImageService } from 'src/image/image.service';
 import { ReturnPloggingInfoDto } from './dto/return-plogging-info.dto';
+import { GetPloggingInfoDto } from './dto/get-plogging-info.dto';
 
 @Injectable()
 export class PloggingService {
@@ -47,7 +47,7 @@ export class PloggingService {
   async uploadPlogging(
     idToken: string,
     images: Array<Express.Multer.File>,
-    ploggingInfoDto: PloggingInfoDto,
+    getPloggingInfoDto: GetPloggingInfoDto,
   ): Promise<User> {
     try {
       const uid: string = await decodeToken(idToken);
@@ -62,10 +62,10 @@ export class PloggingService {
         .values([
           {
             user: user,
-            run_date: ploggingInfoDto.runDate,
-            run_name: ploggingInfoDto.runName,
-            run_range: ploggingInfoDto.runRange,
-            run_time: ploggingInfoDto.runTime,
+            run_date: getPloggingInfoDto.runDate,
+            run_name: getPloggingInfoDto.runName,
+            run_range: getPloggingInfoDto.runRange,
+            run_time: getPloggingInfoDto.runTime,
             trab_snack: trabSnack,
             calorie: 0, // 아직 칼로리 처리는 안함
           },

@@ -14,11 +14,11 @@ import {
 } from 'src/common/error/constants';
 import { Auth } from 'firebase-admin/lib/auth/auth';
 import { AppleUserInfo } from './types/apple-userinfo.type';
-import { SocialSignInWithAppleDTO } from './dto/social-signIn-with-apple.dto';
+import { GetSocialSignInWithAppleDTO } from './dto/get-social-signIn-with-apple.dto';
 import { UserToken } from './types/user-token.type';
-import { SocialSignInWithKakaoDTO } from './dto/social-signIn-with-kakao-dto';
+import { GetSocialSignInWithKakaoDTO } from './dto/get-social-signIn-with-kakao-dto';
 import { GoogleUserInfo } from './types/google-userinfo.type';
-import { SocialSignInWithGoogleDTO } from './dto/social-signIn-with-google-dto';
+import { GetSocialSignInWithGoogleDTO } from './dto/get-social-signIn-with-google-dto';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
@@ -193,8 +193,8 @@ export class AuthService {
     return this.registerAppleUser(appleUserInfo, firebaseAuth);
   };
 
-  async socialSignInWithKakao(socialSignInWithKakaoDTO: SocialSignInWithKakaoDTO): Promise<UserToken> {
-    const { access_token /*fcm_token*/ } = socialSignInWithKakaoDTO;
+  async socialSignInWithKakao(getSocialSignInWithKakaoDTO: GetSocialSignInWithKakaoDTO): Promise<UserToken> {
+    const { access_token /*fcm_token*/ } = getSocialSignInWithKakaoDTO;
 
     const userToken: UserToken = await this.signInWithKakao(access_token, this.firebaseService.getAuth());
 
@@ -203,8 +203,8 @@ export class AuthService {
     return userToken;
   }
 
-  async socialSignInWithGoogle(socialSignInWithGoogle: SocialSignInWithGoogleDTO): Promise<UserToken> {
-    const { name, profileImage, email, fcm_token } = socialSignInWithGoogle;
+  async socialSignInWithGoogle(getSocialSignInWithGoogle: GetSocialSignInWithGoogleDTO): Promise<UserToken> {
+    const { name, profileImage, email, fcm_token } = getSocialSignInWithGoogle;
     const userToken: UserToken = await this.registerGoogleUser(
       {
         email,
@@ -217,8 +217,8 @@ export class AuthService {
     return userToken;
   }
 
-  async socialSignInWithApple(socialSignInWithAppleDTO: SocialSignInWithAppleDTO): Promise<UserToken> {
-    const { id_token, id, first_name, last_name, fcm_token } = socialSignInWithAppleDTO;
+  async socialSignInWithApple(getSocialSignInWithAppleDTO: GetSocialSignInWithAppleDTO): Promise<UserToken> {
+    const { id_token, id, first_name, last_name, fcm_token } = getSocialSignInWithAppleDTO;
 
     const { uid, token } = await this.signInWithApple(
       id_token,

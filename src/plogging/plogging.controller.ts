@@ -6,7 +6,7 @@ import { User } from 'src/user/entities/user.entity';
 import { serializeMessage } from 'src/common/utils/serialize-message';
 import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
-import { FilesUploadDto } from './dto/plogging-upload.dto';
+import { GetPloggingInfoDto } from './dto/get-plogging-info.dto';
 import { ReturnPloggingInfoDto } from './dto/return-plogging-info.dto';
 
 @ApiTags('Plogging')
@@ -36,10 +36,10 @@ export class PloggingController {
   async uploadPloggingTrashImage(
     @Req() request: Request,
     @UploadedFiles() images: Array<Express.Multer.File>,
-    @Body() filesUploadDto: FilesUploadDto,
+    @Body() getPloggingInfoDto: GetPloggingInfoDto,
   ): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data: User = await this.ploggingService.uploadPlogging(token, images, filesUploadDto);
+    const data: User = await this.ploggingService.uploadPlogging(token, images, getPloggingInfoDto);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

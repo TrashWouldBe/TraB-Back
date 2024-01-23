@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SocialSignInWithGoogleDTO {
+export class GetSocialSignInWithGoogleDTO {
   @ApiProperty({
     example: 'hsoooo2341@gmail.com',
     description: '이메일',

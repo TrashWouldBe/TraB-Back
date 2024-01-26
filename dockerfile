@@ -12,9 +12,10 @@ RUN npm ci
 # 6
 RUN npm run build
 # 7
-RUN pip install
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip
 # 8
-RUN pip install -qr requirements.txt
+RUN pip3 install -r requirements.txt
 
 # STEP 2
 # 9

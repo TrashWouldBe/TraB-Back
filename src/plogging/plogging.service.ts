@@ -95,12 +95,12 @@ export class PloggingService {
 
       ploggings.forEach((plogging) => {
         const temp: ReturnPloggingInfoDto = {
-          plggingId: plogging.plogging_id,
+          ploggingId: plogging.plogging_id,
           runDate: plogging.run_date,
           runName: plogging.run_name,
           runRange: plogging.run_range,
           runTime: plogging.run_time,
-          trabSanck: plogging.trab_snack,
+          trabSnack: plogging.trab_snack,
           calorie: plogging.calorie,
         };
 
@@ -119,12 +119,12 @@ export class PloggingService {
       const targetPlogging: Plogging = await this.getPloggingByUserIdAndPloggingId(uid, pid);
 
       const ret: ReturnPloggingInfoDto = {
-        plggingId: targetPlogging.plogging_id,
+        ploggingId: targetPlogging.plogging_id,
         runDate: targetPlogging.run_date,
         runName: targetPlogging.run_name,
         runRange: targetPlogging.run_range,
         runTime: targetPlogging.run_time,
-        trabSanck: targetPlogging.trab_snack,
+        trabSnack: targetPlogging.trab_snack,
         calorie: targetPlogging.calorie,
       };
 

@@ -4,7 +4,7 @@ export class ReturnPloggingInfoDto {
   @ApiProperty({
     example: 3,
   })
-  plggingId: number;
+  ploggingId: number;
 
   @ApiProperty({
     example: '달린 날짜',
@@ -31,7 +31,7 @@ export class ReturnPloggingInfoDto {
     description: '주은 간식 수',
     example: 6,
   })
-  trabSanck: number;
+  trabSnack: number;
 
   @ApiProperty({
     description: '소모한 칼로리',

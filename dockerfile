@@ -14,8 +14,9 @@ RUN npm run build
 # 7
 RUN apt-get update && \
     apt-get install -y python3 python3-pip
-# 8
-RUN pip3 install -r requirements.txt
+
+RUN python3 -m venv /venv
+RUN /venv/bin/pip install -r requirements.txt
 
 # STEP 2
 # 9

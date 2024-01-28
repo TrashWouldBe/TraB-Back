@@ -1,30 +1,33 @@
 # STEP 1
-# 1
 FROM --platform=linux/amd64 node:21 AS builder
 
-RUN apt-get update || : && apt-get install -y python3 python3-pip python3-venv
-# 2
 WORKDIR /app
-RUN python3 -m venv /venv
-RUN /venv/bin/pip install -r requirements.txt
-# 3
+
+# Copy only the necessary files for installing Python dependencies
+COPY requirements.txt .
+
+# Install Python and required packages directly
+RUN apt-get update \
+    && apt-get install -y python3 python3-pip \
+    && pip3 install --no-cache-dir -r requirements.txt
+
+# Continue with the rest of your build process
 COPY . .
-# 5
+RUN npm install
 RUN npm ci
-# 6
 RUN npm run build
 
 # STEP 2
-# 9
 FROM --platform=linux/amd64 node:21-alpine
-# 19
-WORKDIR /app
-# 11
-ENV NODE_ENV production
-# 12
-COPY --from=builder /app ./
 
-# 13
+WORKDIR /app
+
+# Copy only the necessary files from the builder stage
+COPY --from=builder /app .
+
+# Set environment variables and expose ports
+ENV NODE_ENV production
 EXPOSE 3000
-# 14
+
+# Run your application
 CMD ["npm", "run", "start:dev"]

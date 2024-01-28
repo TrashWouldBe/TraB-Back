@@ -1,29 +1,35 @@
+FROM python:3.10 as build
+
+WORKDIR /opt/app
+RUN python -m venv /opt/app/venv
+ENV PATH="/opt/app/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
 # STEP 1
 # 1
-FROM --platform=linux/amd64 node:21 AS builder
-# 2
-WORKDIR /app
-# 3
-COPY . .
-# 5
+FROM --platform=linux/amd64 node:21
+
+RUN apt update \
+    && apt install software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt update \
+    && apt install python3.10
+
+WORKDIR /opt/app
+COPY --from=build /opt/app/venv /venv
+
+ENV PATH="/opt/app/venv/bin:$PATH"
+
 RUN npm ci
 # 6
 RUN npm run build
-# 7
-RUN apt-get update
-RUN apt-get install -y python3-minimal python3-pip
-RUN pip3 install --no-cache-dir -r requirements.txt
 
-# STEP 2
-# 9
-FROM --platform=linux/amd64 node:21-alpine
-# 19
-WORKDIR /app
-# 11
 ENV NODE_ENV production
-# 12
-COPY --from=builder /app ./
-# 13
+
+COPY . .
+
 EXPOSE 3000
-# 14
+
 CMD ["npm", "run", "start:dev"]

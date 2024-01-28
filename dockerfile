@@ -1,32 +1,22 @@
-# STEP 1
-# 1
-FROM --platform=linux/amd64 node:21 AS builder
-# 2
+# Node.js 빌드 단계
+FROM node:21 AS builder
 WORKDIR /app
-# 3
 COPY . .
-# 5
-RUN npm ci
-# 6
-RUN npm run build
-# 7
+RUN npm install && npm ci && npm run build
 
-# STEP 2
+# Python과 Node.js를 포함하는 최종 이미지
 FROM python:3.9-slim
 WORKDIR /app
-RUN pip install -r requirements.txt
-COPY —from=builder /app ./
 
-# STEP 3
-# 9
-FROM --platform=linux/amd64 node:21-alpine
-# 19
-WORKDIR /app
-# 11
+# Node.js 애플리케이션 복사
+COPY --from=builder /app ./
+
+# Python 패키지 설치
+RUN pip install -r requirements.txt
+
+# Node.js 환경 변수 설정 및 포트 노출
 ENV NODE_ENV production
-# 12
-COPY —from=builder /app ./
-# 13
 EXPOSE 3000
-# 14
+
+# 애플리케이션 실행
 CMD ["npm", "run", "start:dev"]

@@ -8,6 +8,7 @@ import { serializeMessage } from 'src/common/utils/serialize-message';
 import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
 import { GetUserNameAndWeightDto } from './dto/get-user-name-and-weight.dto';
+import { predictImages } from 'src/common/utils/predict-images';
 
 @ApiTags('User')
 @Controller('user')

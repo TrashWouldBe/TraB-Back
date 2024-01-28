@@ -1,7 +1,7 @@
-import { Controller, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Query, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { serializeMessage } from 'src/common/utils/serialize-message';
 import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
@@ -15,7 +15,7 @@ export class ImageController {
   @Post()
   @ApiBearerAuth('id_token')
   @ApiOperation({
-    summary: '[미완]쓰레기 사진을 저장하는 api',
+    summary: '쓰레기 사진을 저장하는 api',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({

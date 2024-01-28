@@ -45,6 +45,8 @@ export class UserService {
       const user: User = {
         uid,
         email,
+        name: null,
+        weight: null,
         image,
         deletedAt: null,
       };

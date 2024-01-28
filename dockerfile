@@ -12,10 +12,10 @@ RUN pip install -r requirements.txt
 FROM --platform=linux/amd64 node:21
 
 RUN apt update \
-    && apt install software-properties-common \
+    && apt install -y software-properties-common \
     && add-apt-repository ppa:deadsnakes/ppa \
     && apt update \
-    && apt install python3.10
+    && apt install -y python3.10
 
 WORKDIR /opt/app
 COPY --from=build /opt/app/venv /venv

@@ -15,6 +15,9 @@ export class Trash_image {
   @Column({ type: 'date', nullable: false })
   date: Date;
 
+  @Column({ type: 'boolean', nullable: false, default: false })
+  is_used: boolean;
+
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 

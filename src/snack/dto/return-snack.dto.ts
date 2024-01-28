@@ -34,10 +34,10 @@ export class ReturnSnackDto {
   @ApiProperty({
     example: 2,
   })
-  general_waste: number;
+  general: number;
 
   @ApiProperty({
     example: 1,
   })
-  food_waste: number;
+  food: number;
 }

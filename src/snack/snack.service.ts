@@ -119,8 +119,8 @@ export class SnackService {
         plastic: userSnack.plastic,
         vinyl: userSnack.vinyl,
         styrofoam: userSnack.styrofoam,
-        general_waste: userSnack.general_waste,
-        food_waste: userSnack.food_waste,
+        general: userSnack.general,
+        food: userSnack.food,
       };
 
       return ret;
@@ -183,8 +183,8 @@ export class SnackService {
         userSnack.plastic < targetFurniture.plastic ||
         userSnack.vinyl < targetFurniture.vinyl ||
         userSnack.styrofoam < targetFurniture.styrofoam ||
-        userSnack.general_waste < targetFurniture.general_waste ||
-        userSnack.food_waste < targetFurniture.food_waste
+        userSnack.general < targetFurniture.general ||
+        userSnack.food < targetFurniture.food
       ) {
         throw new NotAcceptableException('가지고 있는 간식 개수가 부족합니다.');
       }
@@ -200,8 +200,8 @@ export class SnackService {
           plastic: userSnack.plastic - targetFurniture.plastic,
           vinyl: userSnack.vinyl - targetFurniture.vinyl,
           styrofoam: userSnack.styrofoam - targetFurniture.styrofoam,
-          general_waste: userSnack.general_waste - targetFurniture.general_waste,
-          food_waste: userSnack.food_waste - targetFurniture.food_waste,
+          general_waste: userSnack.general - targetFurniture.general,
+          food_waste: userSnack.food - targetFurniture.food,
         })
         .where('snack_id = :snack_id', { snack_id: userSnack.snack_id })
         .execute();

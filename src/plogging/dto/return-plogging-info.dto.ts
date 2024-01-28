@@ -32,10 +32,4 @@ export class ReturnPloggingInfoDto {
     example: 6,
   })
   trabSnack: number;
-
-  @ApiProperty({
-    description: '소모한 칼로리',
-    example: 78,
-  })
-  calorie: number;
 }

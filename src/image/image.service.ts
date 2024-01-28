@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Plogging_image_relation } from './entities/plogging_image_relation.entity';
 import { PloggingService } from 'src/plogging/plogging.service';
 import { Plogging } from 'src/plogging/entities/plogging.entity';
+import { predictImages } from 'src/common/utils/predict-images';
 
 @Injectable()
 export class ImageService {
@@ -52,8 +53,12 @@ export class ImageService {
     try {
       const uid: string = await decodeToken(idToken);
 
-      /*Todo 모델로 쓰레기 정보 알아내기*/
-      const trashType = 'glass';
+      const images: Array<Express.Multer.File> = [];
+      images.push(image);
+
+      // 모델로 쓰레기 정보 알아내기
+      const trashTypes: string[] = await predictImages(images);
+      const trashType: string = trashTypes[0];
 
       // 이미지 이름을 고유하게 만들기 위해 한국 시각을 이용
       const now = new Date();
@@ -114,9 +119,12 @@ export class ImageService {
       // snack db table 찾아오기
       const snack: Snack = await this.snackService.getSnackByUserId(uid);
 
+      const trashTypes: string[] = await predictImages(images);
+      let idx = 0;
+
       for (const image of images) {
         // Todo
-        const trashType = 'plastic';
+        const trashType = trashTypes[idx++];
         trashMap.set(trashType, trashMap.get(trashType) + 1);
 
         // 이미지를 cloud storage에 저장

@@ -21,9 +21,6 @@ export class Plogging {
   @Column({ type: 'int', nullable: false, default: 0 })
   trab_snack: number;
 
-  @Column({ type: 'int', nullable: false })
-  calorie: number;
-
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 

@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Patch, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Delete, Get, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ReturnUserInfoDto } from './dto/return-user-info.dto';
@@ -7,11 +7,51 @@ import { userErrorCode } from 'src/common/error/errorCode';
 import { serializeMessage } from 'src/common/utils/serialize-message';
 import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
+import { GetUserNameAndWeightDto } from './dto/get-user-name-and-weight.dto';
+import { predictImages } from 'src/common/utils/predict-images';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post()
+  @ApiBearerAuth('id_token')
+  @ApiOperation({
+    summary: '유저 이름과 몸무게를 추가하는 api',
+  })
+  @ApiBody({
+    type: GetUserNameAndWeightDto,
+  })
+  @ApiResponse({
+    status: 201,
+    description: '성공: 유저 정보 반환',
+    type: ReturnUserInfoDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '실패: 유저를 찾을 수 없음',
+  })
+  @ApiResponse({
+    status: 406,
+    description: '실패: 토큰오류',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 오류',
+  })
+  async updateUser(
+    @Req() request: Request,
+    getUserNameAndWeightDto: GetUserNameAndWeightDto,
+  ): Promise<SerializedMessage> {
+    const token: string = request.headers['authorization'];
+    const data: ReturnUserInfoDto = await this.userService.updateUser(token, getUserNameAndWeightDto);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
 
   @Get()
   @ApiBearerAuth('id_token')

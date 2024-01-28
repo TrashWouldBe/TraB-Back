@@ -1,35 +1,36 @@
-FROM python:3.10 as build
+# Use Ubuntu as base image
+FROM ubuntu:20.04
 
+# Set non-interactive mode for apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install necessary packages
+RUN apt-get update \
+    && apt-get install -y python3 python3-pip nodejs npm
+
+# Upgrade pip
+RUN python3 -m pip install --upgrade pip
+
+# Set working directory
 WORKDIR /opt/app
-RUN python -m venv /opt/app/venv
-ENV PATH="/opt/app/venv/bin:$PATH"
 
+# Install Python packages
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
-# STEP 1
-# 1
-FROM --platform=linux/amd64 node:21
+# Install Node packages
+COPY package.json .
+COPY package-lock.json .
+RUN npm install
 
-RUN apt update \
-    && apt install -y software-properties-common \
-    && add-apt-repository ppa:deadsnakes/ppa \
-    && apt update \
-    && apt install -y python3.10
-
-WORKDIR /opt/app
-COPY --from=build /opt/app/venv /venv
-
-ENV PATH="/opt/app/venv/bin:$PATH"
-
-RUN npm ci
-# 6
-RUN npm run build
-
-ENV NODE_ENV production
-
+# Copy the rest of your application files
 COPY . .
 
+# Expose necessary ports
 EXPOSE 3000
 
+# Set environment variables if needed
+# ENV MY_VARIABLE=value
+
+# Run your application
 CMD ["npm", "run", "start:dev"]

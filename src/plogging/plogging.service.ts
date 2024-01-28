@@ -50,7 +50,8 @@ export class PloggingService {
     getPloggingInfoDto: GetPloggingInfoDto,
   ): Promise<User> {
     try {
-      const uid: string = await decodeToken(idToken);
+      // const uid: string = await decodeToken(idToken);
+      const uid: string = idToken;
 
       const trabSnack: number = images.length;
       const user: User = await this.userService.getUserByUserId(uid);
@@ -67,7 +68,6 @@ export class PloggingService {
             run_range: getPloggingInfoDto.runRange,
             run_time: getPloggingInfoDto.runTime,
             trab_snack: trabSnack,
-            calorie: 0, // 아직 칼로리 처리는 안함
           },
         ])
         .execute();
@@ -101,7 +101,6 @@ export class PloggingService {
           runRange: plogging.run_range,
           runTime: plogging.run_time,
           trabSnack: plogging.trab_snack,
-          calorie: plogging.calorie,
         };
 
         ret.push(temp);
@@ -125,7 +124,6 @@ export class PloggingService {
         runRange: targetPlogging.run_range,
         runTime: targetPlogging.run_time,
         trabSnack: targetPlogging.trab_snack,
-        calorie: targetPlogging.calorie,
       };
 
       return ret;

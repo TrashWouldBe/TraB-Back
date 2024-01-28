@@ -21,7 +21,7 @@ export const typeOrmConfig: TypeOrmModuleAsyncOptions = {
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_DATABASE'),
       entities: [User, Trab, Snack, Plogging, Furniture, Trash_image, Inquire, Plogging_image_relation],
-      synchronize: false,
+      synchronize: true,
     };
     return option;
   },

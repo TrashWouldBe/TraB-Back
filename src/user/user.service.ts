@@ -8,6 +8,7 @@ import { FirebaseService } from 'src/firebase/firebase.service';
 import { HttpServerError } from 'src/common/error/errorHandler';
 import { userErrorCode } from 'src/common/error/errorCode';
 import { decodeToken } from 'src/common/utils/decode-idtoken';
+import { GetUserNameAndWeightDto } from './dto/get-user-name-and-weight.dto';
 
 @Injectable()
 export class UserService {
@@ -57,27 +58,43 @@ export class UserService {
     }
   }
 
+  async updateUser(idToken: string, getUserNameAndWeightDto: GetUserNameAndWeightDto): Promise<ReturnUserInfoDto> {
+    try {
+      const name: string = getUserNameAndWeightDto.name;
+      const weight: number = getUserNameAndWeightDto.weight;
+
+      const uid: string = await decodeToken(idToken);
+      const nowUser: User = await this.getUserByUserId(uid);
+
+      nowUser.name = name;
+      nowUser.weight = weight;
+
+      await this.userRepository.save(nowUser);
+
+      const ret: ReturnUserInfoDto = {
+        name: nowUser.name,
+        weight: nowUser.weight,
+        email: nowUser.email,
+        image: nowUser.image,
+      };
+
+      return ret;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getUserInfo(idToken: string): Promise<ReturnUserInfoDto> {
     try {
       const uid: string = await decodeToken(idToken);
 
-      const user = await this.userRepository.find({
-        select: {
-          email: true,
-          image: true,
-        },
-        where: {
-          uid: uid,
-        },
-      });
-
-      if (user.length === 0) {
-        throw new NotFoundException('유저를 찾을 수 없습니다.');
-      }
+      const nowUser: User = await this.getUserByUserId(uid);
 
       const ret: ReturnUserInfoDto = {
-        user_email: user[0].email,
-        user_image: user[0].image,
+        name: nowUser.name,
+        weight: nowUser.weight,
+        email: nowUser.email,
+        image: nowUser.image,
       };
 
       return ret;
@@ -90,20 +107,9 @@ export class UserService {
     try {
       const uid: string = await decodeToken(idToken);
 
-      const user = await this.userRepository.find({
-        select: {
-          image: true,
-        },
-        where: {
-          uid: uid,
-        },
-      });
+      const nowUser: User = await this.getUserByUserId(uid);
 
-      if (user.length === 0) {
-        throw new NotFoundException('유저를 찾을 수 없습니다.');
-      }
-
-      return user[0].image;
+      return nowUser.image;
     } catch (error) {
       throw error;
     }

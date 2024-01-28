@@ -8,6 +8,7 @@ import { ReturnFurnitureInfoDto } from './dto/return-furniture-info.dto';
 import { ReturnSnackDto } from 'src/snack/dto/return-snack.dto';
 import { GetFurnitureDto } from './dto/get-furniture.dto';
 import { SnackService } from 'src/snack/snack.service';
+import { ImageService } from 'src/image/image.service';
 
 @Injectable()
 export class FurnitureService {
@@ -15,6 +16,7 @@ export class FurnitureService {
     @InjectRepository(Furniture)
     private readonly furnitureRepository: Repository<Furniture>,
     private readonly snackService: SnackService,
+    private readonly imageService: ImageService,
   ) {}
 
   async createFurniture(trab: Trab): Promise<void> {
@@ -83,8 +85,8 @@ export class FurnitureService {
         plastic: targetFurniture.plastic,
         vinyl: targetFurniture.vinyl,
         styrofoam: targetFurniture.styrofoam,
-        general_waste: targetFurniture.general_waste,
-        food_waste: targetFurniture.food_waste,
+        general: targetFurniture.general,
+        food: targetFurniture.food,
       };
 
       return ret;
@@ -135,7 +137,8 @@ export class FurnitureService {
         2. furniture 필요 간식 개수 가져옴
         3. snack을 소모가 가능한지 판단
         4. snack table에서 그만큼 소모 시킴 
-        5. furniture table에 is_get 변수 true로 변경
+        5. 쓰레기 사진을 is_used로 변경
+        6. furniture table에 is_get 변수 true로 변경
       */
       const trabId: number = getFurnitureDto.trabId;
       const furnitureName: string = getFurnitureDto.furnitureName;
@@ -144,6 +147,9 @@ export class FurnitureService {
       await this.snackService.useSnack(trabId, furnitureName);
 
       // 5
+      await this.imageService.useTrash(trabId, furnitureName);
+
+      // 6
       const result = await this.furnitureRepository
         .createQueryBuilder()
         .update(Furniture)
@@ -156,7 +162,7 @@ export class FurnitureService {
         throw new NotAcceptableException('디비 저장과정에서 오류가 발생했습니다2.');
       }
 
-      // 6. 실행이 잘 되었는지 쿼리 한 번을 더 날려봄 (어차피 make Furniture을 자주 하지 않으므로 추가함)
+      // 7. 실행이 잘 되었는지 쿼리 한 번을 더 날려봄 (어차피 make Furniture을 자주 하지 않으므로 추가함)
       const check: Furniture[] = await this.furnitureRepository.find({
         select: {
           trab: {

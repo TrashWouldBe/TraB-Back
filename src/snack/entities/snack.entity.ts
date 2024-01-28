@@ -29,10 +29,10 @@ export class Snack {
   styrofoam: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
-  general_waste: number;
+  general: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
-  food_waste: number;
+  food: number;
 
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;

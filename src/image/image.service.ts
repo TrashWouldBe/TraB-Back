@@ -11,6 +11,7 @@ import { Plogging_image_relation } from './entities/plogging_image_relation.enti
 import { PloggingService } from 'src/plogging/plogging.service';
 import { Plogging } from 'src/plogging/entities/plogging.entity';
 import { predictImages } from 'src/common/utils/predict-images';
+import { FURNITURE_LIST } from 'src/common/constants/furniture-list';
 
 @Injectable()
 export class ImageService {
@@ -179,12 +180,63 @@ export class ImageService {
           snack: {
             snack_id: snackId,
           },
+          is_used: false,
         },
         order: {
-          date: 'DESC',
+          date: 'ASC',
         },
       });
       return trashImages;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async makeIsUsedTrue(snackId: number, trashTag: string, cnt: number): Promise<void> {
+    try {
+      if (cnt === 0) return;
+
+      const trashImages: Trash_image[] = await this.trashImageRepository.find({
+        where: {
+          snack: {
+            snack_id: snackId,
+          },
+          trash_tag: trashTag,
+        },
+        order: {
+          date: 'ASC',
+        },
+        take: cnt,
+      });
+
+      for (const trashImage of trashImages) {
+        await this.trashImageRepository
+          .createQueryBuilder()
+          .update(Trash_image)
+          .set({ is_used: true })
+          .where('id = :id', { id: trashImage.image_id })
+          .execute();
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async useTrash(trabId: number, furnitureName: string): Promise<void> {
+    try {
+      const snack: Snack = await this.snackService.getSnackByTrabId(trabId);
+
+      const furnitures = Object.values(FURNITURE_LIST);
+      const targetFurniture = furnitures.find((furniture) => furniture.furnitureName === furnitureName);
+
+      await this.makeIsUsedTrue(snack.snack_id, 'glass', targetFurniture.glass);
+      await this.makeIsUsedTrue(snack.snack_id, 'paper', targetFurniture.paper);
+      await this.makeIsUsedTrue(snack.snack_id, 'can', targetFurniture.can);
+      await this.makeIsUsedTrue(snack.snack_id, 'plastic', targetFurniture.plastic);
+      await this.makeIsUsedTrue(snack.snack_id, 'vinyl', targetFurniture.vinyl);
+      await this.makeIsUsedTrue(snack.snack_id, 'styrofoam', targetFurniture.styrofoam);
+      await this.makeIsUsedTrue(snack.snack_id, 'general', targetFurniture.general);
+      await this.makeIsUsedTrue(snack.snack_id, 'food', targetFurniture.food);
     } catch (error) {
       throw error;
     }

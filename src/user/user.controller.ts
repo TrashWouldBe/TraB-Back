@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ReturnUserInfoDto } from './dto/return-user-info.dto';
@@ -42,10 +42,11 @@ export class UserController {
   })
   async updateUser(
     @Req() request: Request,
-    getUserNameAndWeightDto: GetUserNameAndWeightDto,
+    @Body() getUserNameAndWeightDto: GetUserNameAndWeightDto,
   ): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data: ReturnUserInfoDto = await this.userService.updateUser(token, getUserNameAndWeightDto);
+    const { name, weight } = getUserNameAndWeightDto;
+    const data: ReturnUserInfoDto = await this.userService.updateUser(token, name, weight);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

@@ -4,12 +4,12 @@ export class ReturnUserInfoDto {
   @ApiProperty({
     example: '유저 이름',
   })
-  name: string | null;
+  name?: string;
 
   @ApiProperty({
     example: '유저 몸무게',
   })
-  weight: number | null;
+  weight?: number;
 
   @ApiProperty({
     example: 'hjeongb0320@gmail.com',
@@ -19,5 +19,5 @@ export class ReturnUserInfoDto {
   @ApiProperty({
     example: 'https://storage.googleapis.com/trab-image/user-uid/imag.png',
   })
-  image: string | null;
+  image?: string;
 }

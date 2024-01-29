@@ -58,22 +58,15 @@ export class UserService {
     }
   }
 
-  async updateUser(idToken: string, getUserNameAndWeightDto: GetUserNameAndWeightDto): Promise<ReturnUserInfoDto> {
+  async updateUser(idToken: string, name?: string, weight?: number): Promise<ReturnUserInfoDto> {
     try {
-      const name: string = getUserNameAndWeightDto.name;
-      const weight: number = getUserNameAndWeightDto.weight;
-
       const uid: string = await decodeToken(idToken);
       const nowUser: User = await this.getUserByUserId(uid);
 
-      nowUser.name = name;
-      nowUser.weight = weight;
-
       await this.userRepository.save(nowUser);
-
       const ret: ReturnUserInfoDto = {
-        name: nowUser.name,
-        weight: nowUser.weight,
+        name: name ?? null,
+        weight: weight ?? null,
         email: nowUser.email,
         image: nowUser.image,
       };

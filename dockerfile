@@ -2,8 +2,13 @@
 FROM python:3.11-slim AS python-builder
 WORKDIR /python
 COPY requirements.txt .
-# 필요한 시스템 라이브러리 설치
-RUN apt-get update && apt-get install -y libgl1-mesa-glx && rm -rf /var/lib/apt/lists/*
+
+# 컴파일러 및 필요한 라이브러리 설치
+RUN apt-get update && \
+    apt-get install -y gcc libgl1-mesa-glx && \
+    rm -rf /var/lib/apt/lists/*
+
+# Python 패키지 설치
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Node.js 빌드 단계
@@ -16,10 +21,10 @@ RUN npm install && npm ci && npm run build
 FROM --platform=linux/amd64 node:21
 WORKDIR /app
 
-# Python 환경 복사
+# Python 환경 및 라이브러리 복사
 COPY --from=python-builder /usr/local /usr/local
-# 필요한 시스템 라이브러리 복사
 COPY --from=python-builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+
 # Node.js 애플리케이션 복사
 COPY --from=node-builder /app .
 

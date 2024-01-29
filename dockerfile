@@ -6,6 +6,7 @@ COPY requirements.txt .
 # 컴파일러 및 필요한 라이브러리 설치
 RUN apt-get update && \
     apt-get install -y gcc libgl1-mesa-glx && \
+    dpkg -L libgl1-mesa-glx \
     rm -rf /var/lib/apt/lists/*
 
 # Python 패키지 설치

@@ -1,14 +1,27 @@
-# Python과 Node.js를 포함하는 최종 이미지
-FROM python:3.9-slim AS py
-WORKDIR /app
-COPY . .
-RUN pip install -r requirements.txt
+# Python 빌드 단계
+FROM python:3.11-slim AS python-builder
+WORKDIR /python
+COPY requirements.txt .
+# 필요한 시스템 라이브러리 설치
+RUN apt-get update && apt-get install -y libgl1-mesa-glx && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Node.js 빌드 단계
-FROM node:21 AS builder
+FROM --platform=linux/amd64 node:21 AS node-builder
 WORKDIR /app
-COPY --from=py /app ./
-RUN npm ci && npm run build
+COPY . .
+RUN npm install && npm ci && npm run build
+
+# 최종 이미지
+FROM --platform=linux/amd64 node:21
+WORKDIR /app
+
+# Python 환경 복사
+COPY --from=python-builder /usr/local /usr/local
+# 필요한 시스템 라이브러리 복사
+COPY --from=python-builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+# Node.js 애플리케이션 복사
+COPY --from=node-builder /app .
 
 # Node.js 환경 변수 설정 및 포트 노출
 ENV NODE_ENV production

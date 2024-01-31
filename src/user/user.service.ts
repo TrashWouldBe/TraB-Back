@@ -63,7 +63,7 @@ export class UserService {
       const uid: string = await decodeToken(idToken);
       const nowUser: User = await this.getUserByUserId(uid);
 
-      await this.userRepository.save(nowUser);
+      await this.userRepository.save({ ...nowUser, name, weight });
       const ret: ReturnUserInfoDto = {
         name: name ?? null,
         weight: weight ?? null,

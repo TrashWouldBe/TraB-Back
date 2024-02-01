@@ -130,7 +130,7 @@ export class FurnitureService {
     }
   }
 
-  async makeFurniture(getFurnitureDto: GetFurnitureDto): Promise<ReturnFurnitureInfoDto> {
+  async makeFurniture(trabId: number, furnitureName: string): Promise<ReturnFurnitureInfoDto> {
     try {
       /*
         1. snack table을 가져옴
@@ -140,8 +140,6 @@ export class FurnitureService {
         5. 쓰레기 사진을 is_used로 변경
         6. furniture table에 is_get 변수 true로 변경
       */
-      const trabId: number = getFurnitureDto.trabId;
-      const furnitureName: string = getFurnitureDto.furnitureName;
 
       // 1 2 3 4
       await this.snackService.useSnack(trabId, furnitureName);

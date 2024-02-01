@@ -202,8 +202,14 @@ export class TrabController {
     status: 500,
     description: '실패: 서버 자체 에러',
   })
-  async makeFurniture(@Body() getFurnitureDto: GetFurnitureDto): Promise<SerializedMessage> {
-    const data: ReturnFurnitureInfoDto = await this.furnitureService.makeFurniture(getFurnitureDto);
+  async makeFurniture(
+    @Query('trab_id') trab_id: number,
+    @Body() getFurnitureDto: GetFurnitureDto,
+  ): Promise<SerializedMessage> {
+    const data: ReturnFurnitureInfoDto = await this.furnitureService.makeFurniture(
+      trab_id,
+      getFurnitureDto.furnitureName,
+    );
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

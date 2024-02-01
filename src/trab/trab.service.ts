@@ -95,4 +95,29 @@ export class TrabService {
       throw error;
     }
   }
+
+  async patchTrab(idToken: string, trab_id: number, name: string): Promise<ReturnTrabInfoDto> {
+    try {
+      const uid: string = await decodeToken(idToken);
+
+      await this.trabRepository
+        .createQueryBuilder()
+        .update(Trab)
+        .set({ trab_name: name })
+        .where('trab_id = :trab_id', { trab_id: trab_id })
+        .execute();
+
+      const nowTrab: Trab = await this.getTrabByUserId(uid);
+
+      const ret: ReturnTrabInfoDto = {
+        trabId: nowTrab.trab_id,
+        trabName: nowTrab.trab_name,
+        snackCnt: nowTrab.snack_cnt,
+      };
+
+      return ret;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

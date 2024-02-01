@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TrabService } from './trab.service';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
@@ -66,6 +66,33 @@ export class TrabController {
   async createTrab(@Req() request: Request, @Body() getTrabDto: GetTrabDto): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
     const data: ReturnTrabInfoDto = await this.trabService.createTrab(token, getTrabDto.name);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
+
+  @Patch()
+  @ApiBearerAuth('id_token')
+  @ApiOperation({ summary: 'trab을 수정하는 api' })
+  @ApiBody({ type: GetTrabDto })
+  @ApiResponse({
+    status: 201,
+    description: '성공: trab 정보 반환',
+    type: ReturnTrabInfoDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 에러',
+  })
+  async patchTrab(
+    @Req() request: Request,
+    @Query('trab_id') trab_id: number,
+    @Body() getTrabDto: GetTrabDto,
+  ): Promise<SerializedMessage> {
+    const token: string = request.headers['authorization'];
+    const data: ReturnTrabInfoDto = await this.trabService.patchTrab(token, trab_id, getTrabDto.name);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

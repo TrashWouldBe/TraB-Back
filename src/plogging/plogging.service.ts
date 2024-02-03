@@ -50,7 +50,8 @@ export class PloggingService {
     getPloggingInfoDto: GetPloggingInfoDto,
   ): Promise<User> {
     try {
-      const uid: string = await decodeToken(idToken);
+      // const uid: string = await decodeToken(idToken);
+      const uid: string = idToken;
 
       const trabSnack: number = images.length;
       const user: User = await this.userService.getUserByUserId(uid);

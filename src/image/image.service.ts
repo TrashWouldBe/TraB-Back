@@ -52,7 +52,8 @@ export class ImageService {
 
   async uploadNormalTrashImage(idToken: string, image: Express.Multer.File): Promise<string> {
     try {
-      const uid: string = await decodeToken(idToken);
+      // const uid: string = await decodeToken(idToken);
+      const uid: string = idToken;
 
       const images: Array<Express.Multer.File> = [];
       images.push(image);

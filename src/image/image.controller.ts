@@ -46,7 +46,7 @@ export class ImageController {
     @UploadedFile() image: Express.Multer.File,
   ): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data: string = await this.imageService.uploadNormalTrashImage(token, image);
+    const data: { imageUrl: string; trashType: string } = await this.imageService.uploadNormalTrashImage(token, image);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

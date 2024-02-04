@@ -50,7 +50,10 @@ export class ImageService {
     }
   }
 
-  async uploadNormalTrashImage(idToken: string, image: Express.Multer.File): Promise<string> {
+  async uploadNormalTrashImage(
+    idToken: string,
+    image: Express.Multer.File,
+  ): Promise<{ imageUrl: string; trashType: string }> {
     try {
       const uid: string = await decodeToken(idToken);
 
@@ -86,14 +89,17 @@ export class ImageService {
           },
         ])
         .execute();
-
-      return imageUrl;
+      return { imageUrl: imageUrl, trashType: trashType };
     } catch (error) {
       throw error;
     }
   }
 
-  async uploadPloggingTrashImages(uid: string, ploggingId: number, images: Array<Express.Multer.File>): Promise<void> {
+  async uploadPloggingTrashImages(
+    uid: string,
+    ploggingId: number,
+    images: Array<Express.Multer.File>,
+  ): Promise<{ imageUrl: string; trashType: string }[]> {
     try {
       // 쓰레기 종류를 저장했다가 한번만 db 접근을 하기 위함
       const trashMap = new Map([
@@ -168,6 +174,10 @@ export class ImageService {
         .into(Plogging_image_relation)
         .values(ploggingImageRelations)
         .execute();
+      return dataArray.map((data) => ({
+        imageUrl: data.image,
+        trashType: data.trash_tag,
+      }));
     } catch (error) {
       throw error;
     }

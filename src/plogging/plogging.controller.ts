@@ -43,7 +43,11 @@ export class PloggingController {
     @Body() getPloggingInfoDto: GetPloggingInfoDto,
   ): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data: User = await this.ploggingService.uploadPlogging(token, images, getPloggingInfoDto);
+    const data: { imageUrl: string; trashType: string }[] = await this.ploggingService.uploadPlogging(
+      token,
+      images,
+      getPloggingInfoDto,
+    );
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

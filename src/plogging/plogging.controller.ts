@@ -16,7 +16,7 @@ export class PloggingController {
 
   @UseInterceptors(FilesInterceptor('images'))
   @Post()
-  // @ApiBearerAuth('id_token')
+  @ApiBearerAuth('id_token')
   @ApiOperation({
     summary: '플로깅 정보를 저장하는 api',
   })
@@ -41,9 +41,8 @@ export class PloggingController {
     @Req() request: Request,
     @UploadedFiles() images: Array<Express.Multer.File>,
     @Body() getPloggingInfoDto: GetPloggingInfoDto,
-    @Query('token') token: string,
   ): Promise<SerializedMessage> {
-    // const token: string = request.headers['authorization'];
+    const token: string = request.headers['authorization'];
     const data: User = await this.ploggingService.uploadPlogging(token, images, getPloggingInfoDto);
     return serializeMessage({
       code: SUCCESS_CODE,

@@ -245,49 +245,6 @@ export class TrabController {
   }
 
   // check
-  @Patch('/furniture/disarrange')
-  @ApiBearerAuth('id_token')
-  @ApiOperation({
-    summary: '가구를 배치하는 api',
-  })
-  @ApiQuery({
-    name: 'trab_id',
-    description: '트레비 id',
-  })
-  @ApiQuery({
-    name: 'furniture_name',
-    description: '가구이름',
-  })
-  @ApiResponse({
-    status: 201,
-    description: '성공: 배치 해제한 가구 정보 반환',
-    type: ReturnFurnitureInfoDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: '실패: 업데이트를 적용할 가구를 찾지 못함',
-  })
-  @ApiResponse({
-    status: 406,
-    description: '실패: 올바르지 않은 가구',
-  })
-  @ApiResponse({
-    status: 500,
-    description: '실패: 서버 자체 오류',
-  })
-  async disarrangeFurniture(
-    @Query('trab_id') trabId: number,
-    @Query('furniture_name') furnitureName: string,
-  ): Promise<SerializedMessage> {
-    const data: ReturnFurnitureInfoDto = await this.furnitureService.disarrangeFurniture(trabId, furnitureName);
-    return serializeMessage({
-      code: SUCCESS_CODE,
-      message: 'Success',
-      data: data,
-    });
-  }
-
-  // check
   @Get('/snack')
   @ApiBearerAuth('id_token')
   @ApiOperation({

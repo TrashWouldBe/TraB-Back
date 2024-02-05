@@ -199,4 +199,104 @@ export class FurnitureService {
       throw error;
     }
   }
+
+  async arrangeFurniture(trabId: number, furitureName: string): Promise<ReturnFurnitureInfoDto> {
+    try {
+      const furnitures: Furniture[] = await this.furnitureRepository.find({
+        where: {
+          trab: {
+            trab_id: trabId,
+          },
+          name: furitureName,
+        },
+      });
+
+      if (furnitures.length !== 1) {
+        throw new NotAcceptableException('같은 이름의 가구가 여러개 있거나 없음');
+      }
+
+      const targetFurniture: Furniture = furnitures[0];
+
+      if (targetFurniture.is_get === false) {
+        throw new NotAcceptableException('가지고 있지 않은 가구입니다.');
+      }
+
+      if (targetFurniture.is_arrange === true) {
+        throw new NotAcceptableException('이미 배치되어 있는 가구입니다.');
+      }
+
+      const result = await this.furnitureRepository
+        .createQueryBuilder()
+        .update(Furniture)
+        .set({ is_arrange: true })
+        .where('trab_id = :trab_id', { trab_id: trabId })
+        .andWhere('name = :name', { name: furitureName })
+        .execute();
+
+      if (result.affected === 0) {
+        throw new NotFoundException('update 과정에서 오류가 발생했습니다.');
+      }
+
+      const ret: ReturnFurnitureInfoDto = {
+        furnitureId: targetFurniture.furniture_id,
+        name: targetFurniture.name,
+        isArrange: true,
+        isGet: targetFurniture.is_get,
+      };
+
+      return ret;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async disarrangeFurniture(trabId: number, furitureName: string): Promise<ReturnFurnitureInfoDto> {
+    try {
+      const furnitures: Furniture[] = await this.furnitureRepository.find({
+        where: {
+          trab: {
+            trab_id: trabId,
+          },
+          name: furitureName,
+        },
+      });
+
+      if (furnitures.length !== 1) {
+        throw new NotAcceptableException('같은 이름의 가구가 여러개 있거나 없음');
+      }
+
+      const targetFurniture: Furniture = furnitures[0];
+
+      if (targetFurniture.is_get === false) {
+        throw new NotAcceptableException('가지고 있지 않은 가구입니다.');
+      }
+
+      if (targetFurniture.is_arrange === false) {
+        throw new NotAcceptableException('이미 배치되어 있지 않은 가구입니다.');
+      }
+
+      const result = await this.furnitureRepository
+        .createQueryBuilder()
+        .update(Furniture)
+        .set({ is_arrange: false })
+        .where('trab_id = :trab_id', { trab_id: trabId })
+        .andWhere('name = :name', { name: furitureName })
+        .execute();
+
+      if (result.affected === 0) {
+        throw new NotFoundException('update 과정에서 오류가 발생했습니다.');
+      }
+
+      const ret: ReturnFurnitureInfoDto = {
+        furnitureId: targetFurniture.furniture_id,
+        name: targetFurniture.name,
+        isArrange: false,
+        isGet: targetFurniture.is_get,
+      };
+
+      return ret;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

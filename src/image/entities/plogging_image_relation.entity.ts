@@ -8,13 +8,13 @@ export class Plogging_image_relation {
   relation_id: number;
 
   @ManyToOne(() => Plogging, (plogging) => plogging.plogging_id, {
-    cascade: ['soft-remove'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'plogging_id' })
   plogging: Plogging;
 
   @OneToOne(() => Trash_image, (trash_image) => trash_image.image_id, {
-    cascade: ['soft-remove'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'image_id' })
   trash_image: Trash_image;

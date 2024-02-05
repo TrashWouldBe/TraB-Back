@@ -1,4 +1,4 @@
-import { Injectable, NotAcceptableException } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Trab } from './entities/trab.entity';
 import { Repository } from 'typeorm';
@@ -14,8 +14,11 @@ export class TrabService {
   constructor(
     @InjectRepository(Trab)
     private readonly trabRepository: Repository<Trab>,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    @Inject(forwardRef(() => SnackService))
     private readonly snackService: SnackService,
+    @Inject(forwardRef(() => FurnitureService))
     private readonly furnitureService: FurnitureService,
   ) {}
 
@@ -38,25 +41,16 @@ export class TrabService {
   async getTrab(idToken: string): Promise<ReturnTrabInfoDto | null> {
     try {
       const uid: string = await decodeToken(idToken);
-      const user: User = await this.userService.getUserByUserId(uid);
 
-      const trabs: Trab[] = await this.trabRepository.find({
-        where: {
-          user: user,
-        },
-      });
+      const trab: Trab = await this.getTrabByUserId(uid);
 
-      if (trabs.length === 0) return null;
-      else if (trabs.length !== 1) {
-        throw new NotAcceptableException('trab가 여러마리입니다.');
-      } else {
-        const ret: ReturnTrabInfoDto = {
-          trabId: trabs[0].trab_id,
-          trabName: trabs[0].trab_name,
-          snackCnt: trabs[0].snack_cnt,
-        };
-        return ret;
-      }
+      const ret: ReturnTrabInfoDto = {
+        trabId: trab.trab_id,
+        trabName: trab.trab_name,
+        snackCnt: trab.snack_cnt,
+      };
+
+      return ret;
     } catch (error) {
       throw error;
     }
@@ -116,6 +110,22 @@ export class TrabService {
       };
 
       return ret;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async changeTrabSnackCnt(uid: string, snackCnt: number): Promise<void> {
+    try {
+      const userTrab: Trab = await this.getTrabByUserId(uid);
+      const newUserTrabSnackCnt: number = userTrab.snack_cnt + snackCnt;
+
+      await this.trabRepository
+        .createQueryBuilder()
+        .update(Trab)
+        .set({ snack_cnt: newUserTrabSnackCnt })
+        .where('trab_id = :trab_id', { trab_id: userTrab.trab_id })
+        .execute();
     } catch (error) {
       throw error;
     }

@@ -16,7 +16,7 @@ export class Trab {
   deletedAt: Date | null;
 
   @OneToOne(() => User, (user) => user.uid, {
-    cascade: ['soft-remove'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'uid' })
   user: User;

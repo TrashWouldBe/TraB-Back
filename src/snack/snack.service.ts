@@ -4,10 +4,10 @@ import { Snack } from './entities/snack.entity';
 import { Repository } from 'typeorm';
 import { ReturnSnackDto } from './dto/return-snack.dto';
 import { Trab } from 'src/trab/entities/trab.entity';
-import { FURNITURE_LIST } from 'src/common/constants/furniture-list';
 import { ReturnSnackImageInfoDto } from './dto/return-snack-image-info.dto';
 import { ImageService } from 'src/image/image.service';
 import { Trash_image } from 'src/image/entities/trash_image.entity';
+import { GetFurnitureDto } from 'src/furniture/dto/get-furniture.dto';
 
 @Injectable()
 export class SnackService {
@@ -74,16 +74,12 @@ export class SnackService {
     try {
       const userSnack = await this.getSnackByTrabId(trabId);
 
-      const snackTrashImages: Trash_image[] = await this.imageService.getSnackTrashImages(userSnack.snack_id);
+      const snackTrashImages: Trash_image[] = await this.imageService.getTrashImagesBySnackId(userSnack.snack_id);
 
       const ret: ReturnSnackImageInfoDto[] = snackTrashImages.map((trash) => ({
         imageUrl: trash.image,
         trashType: trash.trash_tag,
       }));
-
-      if (ret.length === 0) {
-        throw new NotFoundException('모은 쓰레기가 없는디요?\n');
-      }
 
       return ret;
     } catch (error) {
@@ -157,8 +153,8 @@ export class SnackService {
       userSnack['plastic'] = (userSnack['plastic'] as number) + trashMap.get('plastic');
       userSnack['vinyl'] = (userSnack['vinyl'] as number) + trashMap.get('vinyl');
       userSnack['styrofoam'] = (userSnack['styrofoam'] as number) + trashMap.get('styrofoam');
-      userSnack['general_waste'] = (userSnack['general_waste'] as number) + trashMap.get('general_waste');
-      userSnack['food_waste'] = (userSnack['food_waste'] as number) + trashMap.get('food_waste');
+      userSnack['general'] = (userSnack['general'] as number) + trashMap.get('general');
+      userSnack['food'] = (userSnack['food'] as number) + trashMap.get('food');
 
       await this.snackRepository.save(userSnack);
     } catch (error) {
@@ -166,25 +162,25 @@ export class SnackService {
     }
   }
 
-  async useSnack(trabId: number, furnitureName: string): Promise<void> {
+  async useSnack(trabId: number, getFurnitureDto: GetFurnitureDto): Promise<void> {
     try {
       // 1
       const userSnack: Snack = await this.getSnackByTrabId(trabId);
 
-      // 2
-      const furnitures = Object.values(FURNITURE_LIST);
-      const targetFurniture = furnitures.find((furniture) => furniture.furnitureName === furnitureName);
+      // // 2
+      // const furnitures = Object.values(FURNITURE_LIST);
+      // const targetFurniture = furnitures.find((furniture) => furniture.furnitureName === furnitureName);
 
       // 3
       if (
-        userSnack.glass < targetFurniture.glass ||
-        userSnack.paper < targetFurniture.paper ||
-        userSnack.can < targetFurniture.can ||
-        userSnack.plastic < targetFurniture.plastic ||
-        userSnack.vinyl < targetFurniture.vinyl ||
-        userSnack.styrofoam < targetFurniture.styrofoam ||
-        userSnack.general < targetFurniture.general ||
-        userSnack.food < targetFurniture.food
+        userSnack.glass < getFurnitureDto.glass ||
+        userSnack.paper < getFurnitureDto.paper ||
+        userSnack.can < getFurnitureDto.can ||
+        userSnack.plastic < getFurnitureDto.plastic ||
+        userSnack.vinyl < getFurnitureDto.vinyl ||
+        userSnack.styrofoam < getFurnitureDto.styrofoam ||
+        userSnack.general < getFurnitureDto.general ||
+        userSnack.food < getFurnitureDto.food
       ) {
         throw new NotAcceptableException('가지고 있는 간식 개수가 부족합니다.');
       }
@@ -194,14 +190,14 @@ export class SnackService {
         .createQueryBuilder()
         .update(Snack)
         .set({
-          glass: userSnack.glass - targetFurniture.glass,
-          paper: userSnack.paper - targetFurniture.paper,
-          can: userSnack.can - targetFurniture.can,
-          plastic: userSnack.plastic - targetFurniture.plastic,
-          vinyl: userSnack.vinyl - targetFurniture.vinyl,
-          styrofoam: userSnack.styrofoam - targetFurniture.styrofoam,
-          general_waste: userSnack.general - targetFurniture.general,
-          food_waste: userSnack.food - targetFurniture.food,
+          glass: userSnack.glass - getFurnitureDto.glass,
+          paper: userSnack.paper - getFurnitureDto.paper,
+          can: userSnack.can - getFurnitureDto.can,
+          plastic: userSnack.plastic - getFurnitureDto.plastic,
+          vinyl: userSnack.vinyl - getFurnitureDto.vinyl,
+          styrofoam: userSnack.styrofoam - getFurnitureDto.styrofoam,
+          general: userSnack.general - getFurnitureDto.general,
+          food: userSnack.food - getFurnitureDto.food,
         })
         .where('snack_id = :snack_id', { snack_id: userSnack.snack_id })
         .execute();

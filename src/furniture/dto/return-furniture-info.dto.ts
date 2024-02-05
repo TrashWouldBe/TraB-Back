@@ -7,7 +7,7 @@ export class ReturnFurnitureInfoDto {
   furnitureId: number;
 
   @ApiProperty({
-    example: '가구이름',
+    example: 'trashCan, familyPhoto, table, lighting, potOfLuck, rug, wallpaper, flooring',
   })
   name: string;
 

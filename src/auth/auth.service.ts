@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { KakaoUserInfo } from './types/kakao-userinfo.type';
 import axios from 'axios';
@@ -23,7 +23,11 @@ import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private firebaseService: FirebaseService, private readonly userService: UserService) {}
+  constructor(
+    private firebaseService: FirebaseService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+  ) {}
 
   getKakaoUserInfo = async (accessToken: string) => {
     try {

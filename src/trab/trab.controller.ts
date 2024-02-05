@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TrabService } from './trab.service';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
@@ -22,6 +22,7 @@ export class TrabController {
     private readonly furnitureService: FurnitureService,
   ) {}
 
+  // check
   @Get()
   @ApiBearerAuth('id_token')
   @ApiOperation({
@@ -46,6 +47,7 @@ export class TrabController {
     });
   }
 
+  // check
   @Post()
   @ApiBearerAuth('id_token')
   @ApiOperation({
@@ -53,6 +55,10 @@ export class TrabController {
   })
   @ApiBody({
     type: GetTrabDto,
+  })
+  @ApiQuery({
+    name: 'token',
+    type: 'string',
   })
   @ApiResponse({
     status: 201,
@@ -73,6 +79,7 @@ export class TrabController {
     });
   }
 
+  // check
   @Patch()
   @ApiBearerAuth('id_token')
   @ApiOperation({ summary: 'trab을 수정하는 api' })
@@ -100,6 +107,7 @@ export class TrabController {
     });
   }
 
+  // check
   @Get('/furniture/list')
   @ApiBearerAuth('id_token')
   @ApiOperation({
@@ -127,33 +135,7 @@ export class TrabController {
     });
   }
 
-  @Get('/furniture/info')
-  @ApiBearerAuth('id_token')
-  @ApiOperation({
-    summary: '가구의 간식 정보를 가져오는 api',
-  })
-  @ApiQuery({
-    name: 'furniture_name',
-    description: '가구 이름',
-  })
-  @ApiResponse({
-    status: 201,
-    description: '성공: furniture 간식 정보 반환',
-    type: ReturnSnackDto,
-  })
-  @ApiResponse({
-    status: 500,
-    description: '실패: 서버 자체 에러',
-  })
-  async getFurnitureInfo(@Query('furniture_name') furnitureName: string): Promise<SerializedMessage> {
-    const data: ReturnSnackDto = await this.furnitureService.getFurnitureInfo(furnitureName);
-    return serializeMessage({
-      code: SUCCESS_CODE,
-      message: 'Success',
-      data: data,
-    });
-  }
-
+  // check
   @Get('/furniture/arranged')
   @ApiBearerAuth('id_token')
   @ApiOperation({
@@ -181,6 +163,7 @@ export class TrabController {
     });
   }
 
+  // check
   @Patch('/furniture')
   @ApiBearerAuth('id_token')
   @ApiOperation({
@@ -188,6 +171,10 @@ export class TrabController {
   })
   @ApiBody({
     type: GetFurnitureDto,
+  })
+  @ApiQuery({
+    name: 'trab_id',
+    type: 'number',
   })
   @ApiResponse({
     status: 201,
@@ -206,10 +193,7 @@ export class TrabController {
     @Query('trab_id') trab_id: number,
     @Body() getFurnitureDto: GetFurnitureDto,
   ): Promise<SerializedMessage> {
-    const data: ReturnFurnitureInfoDto = await this.furnitureService.makeFurniture(
-      trab_id,
-      getFurnitureDto.furnitureName,
-    );
+    const data: ReturnFurnitureInfoDto = await this.furnitureService.makeFurniture(trab_id, getFurnitureDto);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',
@@ -217,6 +201,7 @@ export class TrabController {
     });
   }
 
+  // check
   @Get('/snack')
   @ApiBearerAuth('id_token')
   @ApiOperation({
@@ -248,6 +233,7 @@ export class TrabController {
     });
   }
 
+  // check
   @Get('/snack/trashList')
   @ApiBearerAuth('id_token')
   @ApiOperation({

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TrabController } from './trab.controller';
 import { TrabService } from './trab.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,7 +9,12 @@ import { SnackModule } from 'src/snack/snack.module';
 import { FurnitureModule } from 'src/furniture/furniture.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Trab, Furniture]), UserModule, SnackModule, FurnitureModule],
+  imports: [
+    TypeOrmModule.forFeature([Trab, Furniture]),
+    forwardRef(() => UserModule),
+    forwardRef(() => SnackModule),
+    forwardRef(() => FurnitureModule),
+  ],
   controllers: [TrabController],
   providers: [TrabService],
   exports: [TrabService],

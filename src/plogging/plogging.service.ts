@@ -8,6 +8,7 @@ import { User } from 'src/user/entities/user.entity';
 import { ImageService } from 'src/image/image.service';
 import { ReturnPloggingInfoDto } from './dto/return-plogging-info.dto';
 import { GetPloggingInfoDto } from './dto/get-plogging-info.dto';
+import { ReturnTrashImageDto } from 'src/image/dto/return-trash-image.dto';
 
 @Injectable()
 export class PloggingService {
@@ -20,16 +21,10 @@ export class PloggingService {
     private readonly imageService: ImageService,
   ) {}
 
-  async getPloggingByUserIdAndPloggingId(uid: string, ploggingId: number): Promise<Plogging> {
+  async getPloggingByPloggingId(ploggingId: number): Promise<Plogging> {
     try {
       const plogging: Plogging[] = await this.ploggingRepository.find({
-        relations: {
-          user: true,
-        },
         where: {
-          user: {
-            uid: uid,
-          },
           plogging_id: ploggingId,
         },
       });
@@ -48,7 +43,7 @@ export class PloggingService {
     idToken: string,
     images: Array<Express.Multer.File>,
     getPloggingInfoDto: GetPloggingInfoDto,
-  ): Promise<{ imageUrl: string; trashType: string }[]> {
+  ): Promise<ReturnTrashImageDto[]> {
     try {
       const uid: string = await decodeToken(idToken);
 
@@ -71,7 +66,7 @@ export class PloggingService {
         ])
         .execute();
 
-      const data: { imageUrl: string; trashType: string }[] = await this.imageService.uploadPloggingTrashImages(
+      const data: ReturnTrashImageDto[] = await this.imageService.uploadPloggingTrashImages(
         uid,
         newPlogging.generatedMaps[0].plogging_id,
         images,
@@ -86,11 +81,15 @@ export class PloggingService {
   async getPloggingList(token: string): Promise<ReturnPloggingInfoDto[]> {
     try {
       const uid: string = await decodeToken(token);
+
       const ploggings: Plogging[] = await this.ploggingRepository.find({
         where: {
           user: {
             uid: uid,
           },
+        },
+        order: {
+          plogging_id: 'ASC',
         },
       });
 
@@ -115,10 +114,9 @@ export class PloggingService {
     }
   }
 
-  async getPloggingInfo(idToken: string, pid: number): Promise<ReturnPloggingInfoDto> {
+  async getPloggingInfo(pid: number): Promise<ReturnPloggingInfoDto> {
     try {
-      const uid: string = await decodeToken(idToken);
-      const targetPlogging: Plogging = await this.getPloggingByUserIdAndPloggingId(uid, pid);
+      const targetPlogging: Plogging = await this.getPloggingByPloggingId(pid);
 
       const ret: ReturnPloggingInfoDto = {
         ploggingId: targetPlogging.plogging_id,

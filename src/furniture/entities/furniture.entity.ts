@@ -16,7 +16,7 @@ export class Furniture {
   is_get: boolean;
 
   @ManyToOne(() => Trab, (trab) => trab.trab_id, {
-    cascade: ['soft-remove'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'trab_id' })
   trab: Trab;

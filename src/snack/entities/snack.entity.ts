@@ -1,7 +1,7 @@
 import { Trab } from 'src/trab/entities/trab.entity';
 import { Column, DeleteDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-type TrashType = 'glass' | 'paper' | 'can' | 'plastic' | 'vinyl' | 'styrofoam' | 'general_waste' | 'food_waste';
+type TrashType = 'glass' | 'paper' | 'can' | 'plastic' | 'vinyl' | 'styrofoam' | 'general' | 'food';
 
 @Entity('snack')
 export class Snack {
@@ -38,7 +38,7 @@ export class Snack {
   deletedAt: Date | null;
 
   @OneToOne(() => Trab, (trab) => trab.trab_id, {
-    cascade: ['soft-remove'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'trab_id' })
   trab: Trab;

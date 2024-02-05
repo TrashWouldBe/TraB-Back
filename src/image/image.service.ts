@@ -1,5 +1,5 @@
 import { Bucket, Storage } from '@google-cloud/storage';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { decodeToken } from 'src/common/utils/decode-idtoken';
 import { SnackService } from 'src/snack/snack.service';
@@ -11,7 +11,10 @@ import { Plogging_image_relation } from './entities/plogging_image_relation.enti
 import { PloggingService } from 'src/plogging/plogging.service';
 import { Plogging } from 'src/plogging/entities/plogging.entity';
 import { predictImages } from 'src/common/utils/predict-images';
-import { FURNITURE_LIST } from 'src/common/constants/furniture-list';
+import { ReturnTrashImageDto } from './dto/return-trash-image.dto';
+import { GetFurnitureDto } from 'src/furniture/dto/get-furniture.dto';
+import { TrabService } from 'src/trab/trab.service';
+import { getKoreaTime } from 'src/common/utils/get-korea-time';
 
 @Injectable()
 export class ImageService {
@@ -20,8 +23,12 @@ export class ImageService {
 
   constructor(
     private configService: ConfigService,
+    @Inject(forwardRef(() => SnackService))
     private readonly snackService: SnackService,
+    @Inject(forwardRef(() => PloggingService))
     private readonly ploggingService: PloggingService,
+    @Inject(forwardRef(() => TrabService))
+    private readonly trabService: TrabService,
     @InjectRepository(Plogging_image_relation)
     private readonly ploggingImageRelationRepository: Repository<Plogging_image_relation>,
     @InjectRepository(Trash_image)
@@ -50,10 +57,7 @@ export class ImageService {
     }
   }
 
-  async uploadNormalTrashImage(
-    idToken: string,
-    image: Express.Multer.File,
-  ): Promise<{ imageUrl: string; trashType: string }> {
+  async uploadNormalTrashImage(idToken: string, image: Express.Multer.File): Promise<ReturnTrashImageDto> {
     try {
       const uid: string = await decodeToken(idToken);
 
@@ -65,15 +69,16 @@ export class ImageService {
       const trashType: string = trashTypes[0];
 
       // 이미지 이름을 고유하게 만들기 위해 한국 시각을 이용
-      const now = new Date();
-      const koreaTimeDiff = now.getTimezoneOffset() / 60;
-      const koreaNow = new Date(now.getTime() - koreaTimeDiff * 60 * 60 * 1000);
+      const koreaNow = await getKoreaTime();
 
       // 이미지를 cloud storage에 저장
       const imageUrl: string = await this.uploadImageToGCS(image, `${uid}/normal_trash_image/${koreaNow}.png`);
 
       // 주은 쓰레기의 종류를 확인하고 간식에 추가
       const snack: Snack = await this.snackService.earnSnack(uid, trashType);
+
+      // 주은 간식 수 트레비에 업데이트
+      await this.trabService.changeTrabSnackCnt(uid, 1);
 
       // cloud storage에 저장한 url을 db에 저장
       await this.trashImageRepository
@@ -89,7 +94,13 @@ export class ImageService {
           },
         ])
         .execute();
-      return { imageUrl: imageUrl, trashType: trashType };
+
+      const ret: ReturnTrashImageDto = {
+        imageUrl: imageUrl,
+        trashType: trashType,
+      };
+
+      return ret;
     } catch (error) {
       throw error;
     }
@@ -99,7 +110,7 @@ export class ImageService {
     uid: string,
     ploggingId: number,
     images: Array<Express.Multer.File>,
-  ): Promise<{ imageUrl: string; trashType: string }[]> {
+  ): Promise<ReturnTrashImageDto[]> {
     try {
       // 쓰레기 종류를 저장했다가 한번만 db 접근을 하기 위함
       const trashMap = new Map([
@@ -109,8 +120,8 @@ export class ImageService {
         ['plastic', 0],
         ['vinyl', 0],
         ['styrofoam', 0],
-        ['general_waste', 0],
-        ['food_waste', 0],
+        ['general', 0],
+        ['food', 0],
       ]);
 
       const dataArray: any[] = [];
@@ -119,18 +130,17 @@ export class ImageService {
       let imageIdx = 1;
 
       // 이미지 이름을 고유하게 만들기 위해 한국 시각을 이용
-      const now = new Date();
-      const koreaTimeDiff = now.getTimezoneOffset() / 60;
-      const koreaNow = new Date(now.getTime() - koreaTimeDiff * 60 * 60 * 1000);
+      const koreaNow = await getKoreaTime();
 
       // snack db table 찾아오기
       const snack: Snack = await this.snackService.getSnackByUserId(uid);
 
+      // 쓰레기 이미지 종류 model로 예측
       const trashTypes: string[] = await predictImages(images);
       let idx = 0;
 
+      // 쓰레기 사진 storage에 저장하고 쓰레기 종류 몹기
       for (const image of images) {
-        // Todo
         const trashType = trashTypes[idx++];
         trashMap.set(trashType, trashMap.get(trashType) + 1);
 
@@ -153,6 +163,9 @@ export class ImageService {
       // 주은 쓰레기의 종류를 확인하고 간식에 추가
       await this.snackService.earnSnacks(uid, trashMap);
 
+      // 주은 간식 수 트레비에 업데이트
+      await this.trabService.changeTrabSnackCnt(uid, images.length);
+
       // cloud storage에 저장한 url을 db에 저장 - 한번에 하기 위해서 bulk insert 이용
       const imageRow = await this.trashImageRepository
         .createQueryBuilder()
@@ -161,7 +174,7 @@ export class ImageService {
         .values(dataArray)
         .execute();
 
-      const ploggingRow: Plogging = await this.ploggingService.getPloggingByUserIdAndPloggingId(uid, ploggingId);
+      const ploggingRow: Plogging = await this.ploggingService.getPloggingByPloggingId(ploggingId);
 
       const ploggingImageRelations = imageRow.generatedMaps.map((image) => ({
         trash_image: image,
@@ -174,16 +187,19 @@ export class ImageService {
         .into(Plogging_image_relation)
         .values(ploggingImageRelations)
         .execute();
-      return dataArray.map((data) => ({
+
+      const ret: ReturnTrashImageDto[] = dataArray.map((data) => ({
         imageUrl: data.image,
         trashType: data.trash_tag,
       }));
+
+      return ret;
     } catch (error) {
       throw error;
     }
   }
 
-  async getSnackTrashImages(snackId: number): Promise<Trash_image[]> {
+  async getTrashImagesBySnackId(snackId: number): Promise<Trash_image[]> {
     try {
       const trashImages: Trash_image[] = await this.trashImageRepository.find({
         where: {
@@ -193,7 +209,7 @@ export class ImageService {
           is_used: false,
         },
         order: {
-          date: 'ASC',
+          image_id: 'ASC',
         },
       });
       return trashImages;
@@ -212,6 +228,7 @@ export class ImageService {
             snack_id: snackId,
           },
           trash_tag: trashTag,
+          is_used: false,
         },
         order: {
           date: 'ASC',
@@ -224,7 +241,7 @@ export class ImageService {
           .createQueryBuilder()
           .update(Trash_image)
           .set({ is_used: true })
-          .where('id = :id', { id: trashImage.image_id })
+          .where('image_id = :id', { id: trashImage.image_id })
           .execute();
       }
     } catch (error) {
@@ -232,21 +249,21 @@ export class ImageService {
     }
   }
 
-  async useTrash(trabId: number, furnitureName: string): Promise<void> {
+  async useTrash(trabId: number, getFurnitureDto: GetFurnitureDto): Promise<void> {
     try {
       const snack: Snack = await this.snackService.getSnackByTrabId(trabId);
 
-      const furnitures = Object.values(FURNITURE_LIST);
-      const targetFurniture = furnitures.find((furniture) => furniture.furnitureName === furnitureName);
+      // const furnitures = Object.values(FURNITURE_LIST);
+      // const targetFurniture = furnitures.find((furniture) => furniture.furnitureName === furnitureName);
 
-      await this.makeIsUsedTrue(snack.snack_id, 'glass', targetFurniture.glass);
-      await this.makeIsUsedTrue(snack.snack_id, 'paper', targetFurniture.paper);
-      await this.makeIsUsedTrue(snack.snack_id, 'can', targetFurniture.can);
-      await this.makeIsUsedTrue(snack.snack_id, 'plastic', targetFurniture.plastic);
-      await this.makeIsUsedTrue(snack.snack_id, 'vinyl', targetFurniture.vinyl);
-      await this.makeIsUsedTrue(snack.snack_id, 'styrofoam', targetFurniture.styrofoam);
-      await this.makeIsUsedTrue(snack.snack_id, 'general', targetFurniture.general);
-      await this.makeIsUsedTrue(snack.snack_id, 'food', targetFurniture.food);
+      await this.makeIsUsedTrue(snack.snack_id, 'glass', getFurnitureDto.glass);
+      await this.makeIsUsedTrue(snack.snack_id, 'paper', getFurnitureDto.paper);
+      await this.makeIsUsedTrue(snack.snack_id, 'can', getFurnitureDto.can);
+      await this.makeIsUsedTrue(snack.snack_id, 'plastic', getFurnitureDto.plastic);
+      await this.makeIsUsedTrue(snack.snack_id, 'vinyl', getFurnitureDto.vinyl);
+      await this.makeIsUsedTrue(snack.snack_id, 'styrofoam', getFurnitureDto.styrofoam);
+      await this.makeIsUsedTrue(snack.snack_id, 'general', getFurnitureDto.general);
+      await this.makeIsUsedTrue(snack.snack_id, 'food', getFurnitureDto.food);
     } catch (error) {
       throw error;
     }

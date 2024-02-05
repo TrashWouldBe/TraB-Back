@@ -1,23 +1,71 @@
-import { Injectable, NotAcceptableException } from '@nestjs/common';
+import { Inject, Injectable, NotAcceptableException, NotFoundException, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Furniture } from './entities/furniture.entity';
 import { Repository } from 'typeorm';
 import { Trab } from 'src/trab/entities/trab.entity';
 import { FURNITURE_LIST } from 'src/common/constants/furniture-list';
 import { ReturnFurnitureInfoDto } from './dto/return-furniture-info.dto';
-import { ReturnSnackDto } from 'src/snack/dto/return-snack.dto';
-import { GetFurnitureDto } from './dto/get-furniture.dto';
 import { SnackService } from 'src/snack/snack.service';
 import { ImageService } from 'src/image/image.service';
+import { GetFurnitureDto } from './dto/get-furniture.dto';
 
 @Injectable()
 export class FurnitureService {
   constructor(
     @InjectRepository(Furniture)
     private readonly furnitureRepository: Repository<Furniture>,
+    @Inject(forwardRef(() => SnackService))
     private readonly snackService: SnackService,
+    @Inject(forwardRef(() => ImageService))
     private readonly imageService: ImageService,
   ) {}
+
+  async getFurnitureByTrabId(trabId: number): Promise<Furniture[]> {
+    try {
+      const furnitures: Furniture[] = await this.furnitureRepository.find({
+        select: {
+          trab: {
+            trab_id: true,
+          },
+        },
+        where: {
+          trab: {
+            trab_id: trabId,
+          },
+        },
+      });
+
+      return furnitures;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getFurnitureByTrabIdAndFurnitureName(trabId: number, furnitureName: string): Promise<Furniture> {
+    try {
+      const furniutres: Furniture[] = await this.furnitureRepository.find({
+        select: {
+          trab: {
+            trab_id: true,
+          },
+        },
+        where: {
+          trab: {
+            trab_id: trabId,
+          },
+          name: furnitureName,
+        },
+      });
+
+      if (furniutres.length !== 1) {
+        throw new NotFoundException('가구 정보를 찾는 과정에서 오류가 발생했습니다.');
+      }
+
+      return furniutres[0];
+    } catch (error) {
+      throw error;
+    }
+  }
 
   async createFurniture(trab: Trab): Promise<void> {
     try {
@@ -40,18 +88,7 @@ export class FurnitureService {
 
   async getFurnitureList(trabId: number): Promise<ReturnFurnitureInfoDto[]> {
     try {
-      const furnitures: Furniture[] = await this.furnitureRepository.find({
-        select: {
-          trab: {
-            trab_id: true,
-          },
-        },
-        where: {
-          trab: {
-            trab_id: trabId,
-          },
-        },
-      });
+      const furnitures: Furniture[] = await this.getFurnitureByTrabId(trabId);
 
       const ret: ReturnFurnitureInfoDto[] = [];
 
@@ -65,29 +102,6 @@ export class FurnitureService {
 
         ret.push(temp);
       });
-
-      return ret;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getFurnitureInfo(furnitureName: string): Promise<ReturnSnackDto> {
-    try {
-      const furnitures = Object.values(FURNITURE_LIST);
-
-      const targetFurniture = furnitures.find((furniture) => furniture.furnitureName === furnitureName);
-
-      const ret: ReturnSnackDto = {
-        glass: targetFurniture.glass,
-        paper: targetFurniture.paper,
-        can: targetFurniture.can,
-        plastic: targetFurniture.plastic,
-        vinyl: targetFurniture.vinyl,
-        styrofoam: targetFurniture.styrofoam,
-        general: targetFurniture.general,
-        food: targetFurniture.food,
-      };
 
       return ret;
     } catch (error) {
@@ -130,7 +144,7 @@ export class FurnitureService {
     }
   }
 
-  async makeFurniture(trabId: number, furnitureName: string): Promise<ReturnFurnitureInfoDto> {
+  async makeFurniture(trabId: number, getFurnitureDto: GetFurnitureDto): Promise<ReturnFurnitureInfoDto> {
     try {
       /*
         1. snack table을 가져옴
@@ -141,11 +155,21 @@ export class FurnitureService {
         6. furniture table에 is_get 변수 true로 변경
       */
 
+      // 0 데이터 전처리
+      getFurnitureDto.glass = getFurnitureDto.glass ?? 0;
+      getFurnitureDto.paper = getFurnitureDto.paper ?? 0;
+      getFurnitureDto.can = getFurnitureDto.can ?? 0;
+      getFurnitureDto.plastic = getFurnitureDto.plastic ?? 0;
+      getFurnitureDto.vinyl = getFurnitureDto.vinyl ?? 0;
+      getFurnitureDto.styrofoam = getFurnitureDto.styrofoam ?? 0;
+      getFurnitureDto.general = getFurnitureDto.general ?? 0;
+      getFurnitureDto.food = getFurnitureDto.food ?? 0;
+
       // 1 2 3 4
-      await this.snackService.useSnack(trabId, furnitureName);
+      await this.snackService.useSnack(trabId, getFurnitureDto);
 
       // 5
-      await this.imageService.useTrash(trabId, furnitureName);
+      await this.imageService.useTrash(trabId, getFurnitureDto);
 
       // 6
       const result = await this.furnitureRepository
@@ -153,7 +177,7 @@ export class FurnitureService {
         .update(Furniture)
         .set({ is_get: true })
         .where('trab_id = :trab_id', { trab_id: trabId })
-        .andWhere('name = :name', { name: furnitureName })
+        .andWhere('name = :name', { name: getFurnitureDto.furnitureName })
         .execute();
 
       if (result.affected === 0) {
@@ -161,25 +185,13 @@ export class FurnitureService {
       }
 
       // 7. 실행이 잘 되었는지 쿼리 한 번을 더 날려봄 (어차피 make Furniture을 자주 하지 않으므로 추가함)
-      const check: Furniture[] = await this.furnitureRepository.find({
-        select: {
-          trab: {
-            trab_id: true,
-          },
-        },
-        where: {
-          trab: {
-            trab_id: trabId,
-          },
-          name: furnitureName,
-        },
-      });
+      const check: Furniture = await this.getFurnitureByTrabIdAndFurnitureName(trabId, getFurnitureDto.furnitureName);
 
       const ret: ReturnFurnitureInfoDto = {
-        furnitureId: check[0].furniture_id,
-        name: check[0].name,
-        isArrange: check[0].is_arrange,
-        isGet: check[0].is_get,
+        furnitureId: check.furniture_id,
+        name: check.name,
+        isArrange: check.is_arrange,
+        isGet: check.is_get,
       };
 
       return ret;

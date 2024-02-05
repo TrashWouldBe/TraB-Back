@@ -1,10 +1,11 @@
 import { Controller, Post, Query, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { serializeMessage } from 'src/common/utils/serialize-message';
 import { SUCCESS_CODE } from 'src/common/constants/constants';
 import { SerializedMessage } from 'src/common/types/serialized-message.type';
+import { ReturnTrashImageDto } from './dto/return-trash-image.dto';
 
 @ApiTags('Image')
 @Controller('image')
@@ -32,6 +33,7 @@ export class ImageController {
   @ApiResponse({
     status: 201,
     description: '성공: 이미지 업로드 성공',
+    type: ReturnTrashImageDto,
   })
   @ApiResponse({
     status: 404,
@@ -46,7 +48,7 @@ export class ImageController {
     @UploadedFile() image: Express.Multer.File,
   ): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
-    const data: { imageUrl: string; trashType: string } = await this.imageService.uploadNormalTrashImage(token, image);
+    const data: ReturnTrashImageDto = await this.imageService.uploadNormalTrashImage(token, image);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

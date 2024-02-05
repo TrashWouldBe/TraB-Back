@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, NotAcceptableException, NotFoundException, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -8,7 +8,6 @@ import { FirebaseService } from 'src/firebase/firebase.service';
 import { HttpServerError } from 'src/common/error/errorHandler';
 import { userErrorCode } from 'src/common/error/errorCode';
 import { decodeToken } from 'src/common/utils/decode-idtoken';
-import { GetUserNameAndWeightDto } from './dto/get-user-name-and-weight.dto';
 
 @Injectable()
 export class UserService {
@@ -16,6 +15,7 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly firebaseService: FirebaseService,
+    @Inject(forwardRef(() => ImageService))
     private readonly imageService: ImageService,
   ) {}
 
@@ -114,7 +114,7 @@ export class UserService {
 
       const auth = this.firebaseService.getAuth();
 
-      await auth.deleteUser(uid).catch((error) => {
+      await auth.deleteUser(uid).catch(() => {
         throw new HttpServerError(
           {
             code: userErrorCode.FAIL_DELETE_USER_IN_FIREBASE,

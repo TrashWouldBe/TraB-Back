@@ -25,7 +25,7 @@ export class Plogging {
   deletedAt: Date | null;
 
   @ManyToOne(() => User, (user) => user.uid, {
-    cascade: ['soft-remove'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'uid' })
   user: User;

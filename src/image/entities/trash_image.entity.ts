@@ -22,7 +22,7 @@ export class Trash_image {
   deletedAt: Date | null;
 
   @ManyToOne(() => Snack, (snack) => snack.snack_id, {
-    cascade: ['soft-remove'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'snack_id' })
   snack: Snack;

@@ -87,6 +87,23 @@ export class SnackService {
     }
   }
 
+  async getSnackTotalImages(trabId: number): Promise<ReturnSnackImageInfoDto[]> {
+    try {
+      const userSnack = await this.getSnackByTrabId(trabId);
+
+      const snackTrashImages: Trash_image[] = await this.imageService.getTotalTrashImagesBySnackId(userSnack.snack_id);
+
+      const ret: ReturnSnackImageInfoDto[] = snackTrashImages.map((trash) => ({
+        imageUrl: trash.image,
+        trashType: trash.trash_tag,
+      }));
+
+      return ret;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async createSnack(trab: Trab): Promise<void> {
     try {
       await this.snackRepository
@@ -117,6 +134,29 @@ export class SnackService {
         styrofoam: userSnack.styrofoam,
         general: userSnack.general,
         food: userSnack.food,
+      };
+
+      return ret;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getTotalSnack(trabId: number): Promise<ReturnSnackDto> {
+    try {
+      const userSnack = await this.getSnackByTrabId(trabId);
+
+      const usedTrash: number[] = await this.imageService.getUsedTrash(trabId);
+
+      const ret: ReturnSnackDto = {
+        glass: userSnack.glass + usedTrash[0],
+        paper: userSnack.paper + usedTrash[1],
+        metal: userSnack.metal + usedTrash[2],
+        plastic: userSnack.plastic + usedTrash[3],
+        vinyl: userSnack.vinyl + usedTrash[4],
+        styrofoam: userSnack.styrofoam + usedTrash[5],
+        general: userSnack.general + usedTrash[6],
+        food: userSnack.food + usedTrash[7],
       };
 
       return ret;

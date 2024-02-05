@@ -59,8 +59,7 @@ export class ImageService {
 
   async uploadNormalTrashImage(idToken: string, image: Express.Multer.File): Promise<ReturnTrashImageDto> {
     try {
-      // const uid: string = await decodeToken(idToken);
-      const uid = idToken;
+      const uid: string = await decodeToken(idToken);
 
       const images: Array<Express.Multer.File> = [];
       images.push(image);
@@ -219,6 +218,24 @@ export class ImageService {
     }
   }
 
+  async getTotalTrashImagesBySnackId(snackId: number): Promise<Trash_image[]> {
+    try {
+      const trashImages: Trash_image[] = await this.trashImageRepository.find({
+        where: {
+          snack: {
+            snack_id: snackId,
+          },
+        },
+        order: {
+          image_id: 'ASC',
+        },
+      });
+      return trashImages;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async makeIsUsedTrue(snackId: number, trashTag: string, cnt: number): Promise<void> {
     try {
       if (cnt === 0) return;
@@ -265,6 +282,47 @@ export class ImageService {
       await this.makeIsUsedTrue(snack.snack_id, 'styrofoam', getFurnitureDto.styrofoam);
       await this.makeIsUsedTrue(snack.snack_id, 'general', getFurnitureDto.general);
       await this.makeIsUsedTrue(snack.snack_id, 'food', getFurnitureDto.food);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUsedTrash(trabId: number): Promise<number[]> {
+    try {
+      const retArray: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
+
+      const trashImages: Trash_image[] = await this.trashImageRepository.find({
+        where: {
+          snack: {
+            trab: {
+              trab_id: trabId,
+            },
+          },
+          is_used: true,
+        },
+      });
+
+      for (const image of trashImages) {
+        if (image.trash_tag === 'glass') {
+          retArray[0]++;
+        } else if (image.trash_tag === 'paper') {
+          retArray[1]++;
+        } else if (image.trash_tag === 'metal') {
+          retArray[2]++;
+        } else if (image.trash_tag === 'plastic') {
+          retArray[3]++;
+        } else if (image.trash_tag === 'vinyl') {
+          retArray[4]++;
+        } else if (image.trash_tag === 'styrofoam') {
+          retArray[5]++;
+        } else if (image.trash_tag === 'general') {
+          retArray[6]++;
+        } else if (image.trash_tag === 'food') {
+          retArray[7]++;
+        }
+      }
+
+      return retArray;
     } catch (error) {
       throw error;
     }

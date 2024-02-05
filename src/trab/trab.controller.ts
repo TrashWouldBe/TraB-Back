@@ -205,7 +205,7 @@ export class TrabController {
   @Get('/snack')
   @ApiBearerAuth('id_token')
   @ApiOperation({
-    summary: 'trab가 가지고 있는 간식 가져오는 api',
+    summary: 'trab가 가진 남은 간식 가져오는 api',
   })
   @ApiQuery({
     name: 'trab_id',
@@ -234,10 +234,42 @@ export class TrabController {
   }
 
   // check
+  @Get('/totalSnack')
+  @ApiBearerAuth('id_token')
+  @ApiOperation({
+    summary: 'trab가 모은 모든 간식 가져오는 api',
+  })
+  @ApiQuery({
+    name: 'trab_id',
+    description: '트레비 id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공: 간식 정보 반환',
+    type: ReturnSnackDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '실패: snack entity / uid 발견 실패',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 오류',
+  })
+  async getTotalSnack(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
+    const data: ReturnSnackDto = await this.snackService.getTotalSnack(trabId);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
+
+  // check
   @Get('/snack/trashList')
   @ApiBearerAuth('id_token')
   @ApiOperation({
-    summary: 'trab가 가지고 있는 간식 사진 가져오는 api',
+    summary: 'trab가 가지고 있는 남은 간식 사진 가져오는 api',
   })
   @ApiQuery({
     name: 'trab_id',
@@ -258,6 +290,38 @@ export class TrabController {
   })
   async getSnackImages(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
     const data: ReturnSnackImageInfoDto[] = await this.snackService.getSnackImages(trabId);
+    return serializeMessage({
+      code: SUCCESS_CODE,
+      message: 'Success',
+      data: data,
+    });
+  }
+
+  // check
+  @Get('/snack/totalTrashList')
+  @ApiBearerAuth('id_token')
+  @ApiOperation({
+    summary: 'trab가 가지고 있는 모든 간식 사진 가져오는 api',
+  })
+  @ApiQuery({
+    name: 'trab_id',
+    description: '트레비 id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공: 간식 사진 정보 반환',
+    type: ReturnSnackImageInfoDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '실패: snack entity / uid 발견 실패',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '실패: 서버 자체 오류',
+  })
+  async getSnackTotalImages(@Query('trab_id') trabId: number): Promise<SerializedMessage> {
+    const data: ReturnSnackImageInfoDto[] = await this.snackService.getSnackTotalImages(trabId);
     return serializeMessage({
       code: SUCCESS_CODE,
       message: 'Success',

@@ -14,7 +14,7 @@ export class ReturnSnackDto {
   @ApiProperty({
     example: 5,
   })
-  can: number;
+  metal: number;
 
   @ApiProperty({
     example: 1,

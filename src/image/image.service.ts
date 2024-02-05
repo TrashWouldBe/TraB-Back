@@ -59,7 +59,8 @@ export class ImageService {
 
   async uploadNormalTrashImage(idToken: string, image: Express.Multer.File): Promise<ReturnTrashImageDto> {
     try {
-      const uid: string = await decodeToken(idToken);
+      // const uid: string = await decodeToken(idToken);
+      const uid = idToken;
 
       const images: Array<Express.Multer.File> = [];
       images.push(image);
@@ -116,7 +117,7 @@ export class ImageService {
       const trashMap = new Map([
         ['glass', 0],
         ['paper', 0],
-        ['can', 0],
+        ['metal', 0],
         ['plastic', 0],
         ['vinyl', 0],
         ['styrofoam', 0],
@@ -258,7 +259,7 @@ export class ImageService {
 
       await this.makeIsUsedTrue(snack.snack_id, 'glass', getFurnitureDto.glass);
       await this.makeIsUsedTrue(snack.snack_id, 'paper', getFurnitureDto.paper);
-      await this.makeIsUsedTrue(snack.snack_id, 'can', getFurnitureDto.can);
+      await this.makeIsUsedTrue(snack.snack_id, 'metal', getFurnitureDto.metal);
       await this.makeIsUsedTrue(snack.snack_id, 'plastic', getFurnitureDto.plastic);
       await this.makeIsUsedTrue(snack.snack_id, 'vinyl', getFurnitureDto.vinyl);
       await this.makeIsUsedTrue(snack.snack_id, 'styrofoam', getFurnitureDto.styrofoam);

@@ -1,7 +1,7 @@
 import { Trab } from 'src/trab/entities/trab.entity';
 import { Column, DeleteDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-type TrashType = 'glass' | 'paper' | 'can' | 'plastic' | 'vinyl' | 'styrofoam' | 'general' | 'food';
+type TrashType = 'glass' | 'paper' | 'metal' | 'plastic' | 'vinyl' | 'styrofoam' | 'general' | 'food';
 
 @Entity('snack')
 export class Snack {
@@ -17,7 +17,7 @@ export class Snack {
   paper: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
-  can: number;
+  metal: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
   plastic: number;

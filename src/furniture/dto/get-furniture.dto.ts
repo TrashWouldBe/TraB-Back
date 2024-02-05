@@ -25,7 +25,7 @@ export class GetFurnitureDto {
     type: 'number | null',
     default: 0, // 기본값 설정
   })
-  can: number | null;
+  metal: number | null;
 
   @ApiProperty({
     example: 1,

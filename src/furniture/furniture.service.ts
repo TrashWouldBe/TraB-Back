@@ -158,7 +158,7 @@ export class FurnitureService {
       // 0 데이터 전처리
       getFurnitureDto.glass = getFurnitureDto.glass ?? 0;
       getFurnitureDto.paper = getFurnitureDto.paper ?? 0;
-      getFurnitureDto.can = getFurnitureDto.can ?? 0;
+      getFurnitureDto.metal = getFurnitureDto.metal ?? 0;
       getFurnitureDto.plastic = getFurnitureDto.plastic ?? 0;
       getFurnitureDto.vinyl = getFurnitureDto.vinyl ?? 0;
       getFurnitureDto.styrofoam = getFurnitureDto.styrofoam ?? 0;

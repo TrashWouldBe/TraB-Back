@@ -111,7 +111,7 @@ export class SnackService {
       const ret: ReturnSnackDto = {
         glass: userSnack.glass,
         paper: userSnack.paper,
-        can: userSnack.can,
+        metal: userSnack.metal,
         plastic: userSnack.plastic,
         vinyl: userSnack.vinyl,
         styrofoam: userSnack.styrofoam,
@@ -149,7 +149,7 @@ export class SnackService {
 
       userSnack['glass'] = (userSnack['glass'] as number) + trashMap.get('glass');
       userSnack['paper'] = (userSnack['paper'] as number) + trashMap.get('paper');
-      userSnack['can'] = (userSnack['can'] as number) + trashMap.get('can');
+      userSnack['metal'] = (userSnack['metal'] as number) + trashMap.get('metal');
       userSnack['plastic'] = (userSnack['plastic'] as number) + trashMap.get('plastic');
       userSnack['vinyl'] = (userSnack['vinyl'] as number) + trashMap.get('vinyl');
       userSnack['styrofoam'] = (userSnack['styrofoam'] as number) + trashMap.get('styrofoam');
@@ -175,7 +175,7 @@ export class SnackService {
       if (
         userSnack.glass < getFurnitureDto.glass ||
         userSnack.paper < getFurnitureDto.paper ||
-        userSnack.can < getFurnitureDto.can ||
+        userSnack.metal < getFurnitureDto.metal ||
         userSnack.plastic < getFurnitureDto.plastic ||
         userSnack.vinyl < getFurnitureDto.vinyl ||
         userSnack.styrofoam < getFurnitureDto.styrofoam ||
@@ -192,7 +192,7 @@ export class SnackService {
         .set({
           glass: userSnack.glass - getFurnitureDto.glass,
           paper: userSnack.paper - getFurnitureDto.paper,
-          can: userSnack.can - getFurnitureDto.can,
+          metal: userSnack.metal - getFurnitureDto.metal,
           plastic: userSnack.plastic - getFurnitureDto.plastic,
           vinyl: userSnack.vinyl - getFurnitureDto.vinyl,
           styrofoam: userSnack.styrofoam - getFurnitureDto.styrofoam,

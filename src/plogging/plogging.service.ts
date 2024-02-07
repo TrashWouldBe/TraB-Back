@@ -42,7 +42,7 @@ export class PloggingService {
   async uploadPlogging(
     idToken: string,
     getPloggingInfoDto: GetPloggingInfoDto,
-    images?: Array<Express.Multer.File>,
+    images: Array<Express.Multer.File>,
   ): Promise<ReturnTrashImageDto[]> {
     try {
       const uid: string = await decodeToken(idToken);
@@ -66,7 +66,7 @@ export class PloggingService {
         ])
         .execute();
 
-      if (images) {
+      if (images.length > 0) {
         const data: ReturnTrashImageDto[] = await this.imageService.uploadPloggingTrashImages(
           uid,
           newPlogging.generatedMaps[0].plogging_id,

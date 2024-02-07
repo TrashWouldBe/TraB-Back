@@ -38,7 +38,7 @@ export class PloggingController {
   async uploadPloggingTrashImage(
     @Req() request: Request,
     @Body() getPloggingInfoDto: GetPloggingInfoDto,
-    @UploadedFiles() images?: Array<Express.Multer.File>,
+    @UploadedFiles() images: Array<Express.Multer.File>,
   ): Promise<SerializedMessage> {
     const token: string = request.headers['authorization'];
     const data: ReturnTrashImageDto[] = await this.ploggingService.uploadPlogging(token, getPloggingInfoDto, images);

@@ -41,13 +41,13 @@ export class PloggingService {
 
   async uploadPlogging(
     idToken: string,
-    images: Array<Express.Multer.File>,
     getPloggingInfoDto: GetPloggingInfoDto,
+    images?: Array<Express.Multer.File>,
   ): Promise<ReturnTrashImageDto[]> {
     try {
       const uid: string = await decodeToken(idToken);
 
-      const trabSnack: number = images.length;
+      const trabSnack: number = images?.length ?? 0;
       const user: User = await this.userService.getUserByUserId(uid);
 
       const newPlogging = await this.ploggingRepository
@@ -66,13 +66,15 @@ export class PloggingService {
         ])
         .execute();
 
-      const data: ReturnTrashImageDto[] = await this.imageService.uploadPloggingTrashImages(
-        uid,
-        newPlogging.generatedMaps[0].plogging_id,
-        images,
-      );
-
-      return data;
+      if (images) {
+        const data: ReturnTrashImageDto[] = await this.imageService.uploadPloggingTrashImages(
+          uid,
+          newPlogging.generatedMaps[0].plogging_id,
+          images,
+        );
+        return data;
+      }
+      return [];
     } catch (error) {
       throw error;
     }
